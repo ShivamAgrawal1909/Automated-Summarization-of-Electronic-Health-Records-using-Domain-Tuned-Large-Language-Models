@@ -1,0 +1,51 @@
+{% extends "base_user.html" %}
+{% block title %}Upload EHR{% endblock %}
+{% block breadcrumb %}
+<a href="{{ url_for('user.dashboard') }}">Workspace</a><span class="sep">/</span><span class="here">Upload &amp; extract</span>
+{% endblock %}
+{% block page_heading %}Upload electronic health record{% endblock %}
+{% block page_lead %}Attach a clinical document to a registered patient. Supported sources: PDF or UTF-8 plain text. The system extracts text for your review before any summarization step.{% endblock %}
+{% block content %}
+<div class="hint-block">
+  <strong>Limits &amp; formats.</strong> Maximum file size <strong>16 MB</strong>. PDFs are parsed page-by-page; scanned PDFs without a text layer may extract poorly—use text export from your EMR when possible. Only <code>.pdf</code> and <code>.txt</code> extensions are accepted.
+</div>
+{% if not patients %}
+<div class="user-panel">
+  <div class="user-panel-body">
+    <div class="empty-state">
+      <p>Create a patient record before uploading files so documents can be attributed correctly.</p>
+      <a class="btn btn-primary" href="{{ url_for('user.patients_new') }}">Register patient</a>
+    </div>
+  </div>
+</div>
+{% else %}
+<div class="user-panel">
+  <div class="user-panel-header">
+    <div>
+      <h2>File upload</h2>
+      <p class="sub">{{ patients|length }} patient(s) available to link</p>
+    </div>
+  </div>
+  <div style="padding:1.15rem 1.25rem 1.5rem;">
+    <form method="post" enctype="multipart/form-data" style="max-width:560px;">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+      <div class="form-group">
+        <label for="patient_id">Assign to patient</label>
+        <select id="patient_id" name="patient_id" required>
+          <option value="">— Select patient —</option>
+          {% for p in patients %}
+          <option value="{{ p.id }}">{{ p.name }} — {{ p.patient_id }}{% if p.disease_hint %} ({{ p.disease_hint }}){% endif %}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="file">Clinical document</label>
+        <input id="file" name="file" type="file" accept=".pdf,.txt,application/pdf,text/plain" required/>
+        <p class="muted" style="margin:0.35rem 0 0;font-size:0.82rem;">After upload you will land on the extraction review screen where you can re-run OCR-free text extraction if needed.</p>
+      </div>
+      <button class="btn btn-primary" type="submit">Upload &amp; extract text</button>
+    </form>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

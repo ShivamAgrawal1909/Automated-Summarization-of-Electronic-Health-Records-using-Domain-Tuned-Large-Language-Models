@@ -1,0 +1,102 @@
+{% extends "base_admin.html" %}
+{% block title %}Patient {{ patient.patient_id }}{% endblock %}
+{% block breadcrumb %}
+<a href="{{ url_for('admin.dashboard') }}">Admin</a><span class="sep">/</span><a href="{{ url_for('admin.patients_list') }}">Patients</a><span class="sep">/</span><span class="here">#{{ patient.id }}</span>
+{% endblock %}
+{% block page_heading %}{{ patient.name }}{% endblock %}
+{% block page_lead %}Read-only and update flows for a patient record, owned by an end user. View related EHR uploads and generated summaries, then use Edit to correct demographics or delete the whole record.{% endblock %}
+{% block content %}
+<div class="adm-kpi">
+  <div class="adm-k"><div class="l">EHR files</div><div class="v">{{ documents|length }}</div><div class="h">Linked uploads</div></div>
+  <div class="adm-k"><div class="l">Summaries</div><div class="v">{{ summaries|length }}</div><div class="h">Generated reports</div></div>
+  <div class="adm-k"><div class="l">Owner (user ID)</div><div class="v" style="font-size:1rem;">{{ owner.id }}</div>
+    <div class="h"><a href="{{ url_for('admin.users_view', uid=owner.id) }}">{{ owner.name }}</a> · {{ owner.email }}</div>
+  </div>
+</div>
+
+<div class="adm-section">
+  <div class="adm-section-h">
+    <h2>Demographics</h2>
+    <p>Read / Update / Delete on this page</p>
+    <div class="actions adm-actions">
+      <a class="btn btn-primary" style="font-size:0.85rem;" href="{{ url_for('admin.patients_edit', pid=patient.id) }}">Update (U)</a>
+      <form method="post" action="{{ url_for('admin.patients_delete', pid=patient.id) }}" class="inline-form" onsubmit="return confirm('Delete patient and linked data?');">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+        <button class="btn btn-danger" type="submit" style="font-size:0.85rem;">Delete (D)</button>
+      </form>
+    </div>
+  </div>
+  <div style="padding:1rem 1.1rem 1.25rem;">
+    <dl class="adm-dl">
+      <dt>Internal PK</dt><dd>{{ patient.id }}</dd>
+      <dt>External patient ID</dt><dd><code>{{ patient.patient_id }}</code></dd>
+      <dt>Age / gender</dt><dd>{{ patient.age or '—' }} / {{ patient.gender or '—' }}</dd>
+      <dt>Contact</dt><dd>{{ patient.contact or '—' }}</dd>
+      <dt>Condition hint</dt><dd>{{ patient.disease_hint or '—' }}</dd>
+      <dt>Created</dt><dd>{{ patient.created_at.strftime('%Y-%m-%d %H:%M UTC') if patient.created_at else '—' }}</dd>
+    </dl>
+  </div>
+</div>
+
+<div class="adm-section">
+  <div class="adm-section-h"><h2>EHR documents (Read / Delete file)</h2>
+    <p>Full text view opens per file; delete invalid or duplicate files.</p>
+  </div>
+  <div class="adm-tablewrap">
+    {% if documents %}
+    <table class="adm-t">
+      <thead><tr><th>ID</th><th>Filename</th><th>Type</th><th>Uploaded</th><th>Uploader</th><th></th></tr></thead>
+      <tbody>
+        {% for d in documents %}
+        <tr>
+          <td>{{ d.id }}</td>
+          <td>{{ d.original_filename }}</td>
+          <td>{{ d.file_type|upper }}</td>
+          <td class="muted" style="white-space:nowrap;">{{ d.uploaded_at.strftime('%Y-%m-%d %H:%M') if d.uploaded_at else '—' }}</td>
+          <td>{{ d.uploader.email if d.uploader else '—' }}</td>
+          <td class="adm-actions">
+            <a class="btn btn-ghost" style="padding:0.3rem 0.5rem;font-size:0.75rem;" href="{{ url_for('admin.ehr_view', eid=d.id) }}">View (R)</a>
+            <form method="post" action="{{ url_for('admin.ehr_delete', eid=d.id) }}" class="inline-form" onsubmit="return confirm('Delete this document?');">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+              <button class="btn btn-danger" type="submit" style="padding:0.3rem 0.5rem;font-size:0.75rem;">Delete (D)</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}<p class="muted" style="padding:1rem;">No EHR files.</p>{% endif %}
+  </div>
+</div>
+
+<div class="adm-section">
+  <div class="adm-section-h"><h2>Generated summaries (Read / Update / Delete)</h2>
+    <p>Audit narrative and remove incorrect reports.</p>
+  </div>
+  <div class="adm-tablewrap">
+    {% if summaries %}
+    <table class="adm-t">
+      <thead><tr><th>ID</th><th>Status</th><th>Created</th><th>Updated</th><th></th></tr></thead>
+      <tbody>
+        {% for s in summaries %}
+        <tr>
+          <td>{{ s.id }}</td>
+          <td>{% if s.is_saved %}Saved{% else %}Draft{% endif %}</td>
+          <td class="muted" style="white-space:nowrap;">{{ s.created_at.strftime('%Y-%m-%d %H:%M') if s.created_at else '—' }}</td>
+          <td class="muted" style="white-space:nowrap;">{{ s.updated_at.strftime('%Y-%m-%d %H:%M') if s.updated_at else '—' }}</td>
+          <td class="adm-actions">
+            <a class="btn btn-ghost" style="padding:0.3rem 0.5rem;font-size:0.75rem;" href="{{ url_for('admin.summary_view', sid=s.id) }}">View (R)</a>
+            <a class="btn btn-ghost" style="padding:0.3rem 0.5rem;font-size:0.75rem;" href="{{ url_for('admin.summary_edit', sid=s.id) }}">Edit (U)</a>
+            <form method="post" action="{{ url_for('admin.summary_delete', sid=s.id) }}" class="inline-form" onsubmit="return confirm('Delete summary?');">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+              <button class="btn btn-danger" type="submit" style="padding:0.3rem 0.5rem;font-size:0.75rem;">Delete (D)</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}<p class="muted" style="padding:1rem;">No summaries.</p>{% endif %}
+  </div>
+</div>
+{% endblock %}

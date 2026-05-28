@@ -1,0 +1,28 @@
+{% extends "base_admin.html" %}
+{% block title %}Edit medicine{% endblock %}
+{% block breadcrumb %}
+<a href="{{ url_for('admin.dashboard') }}">Admin</a><span class="sep">/</span><a href="{{ url_for('admin.medicines') }}">Medicines</a><span class="sep">/</span><span class="here">#{{ medicine.id }}</span>
+{% endblock %}
+{% block page_heading %}Update medicine #{{ medicine.id }}{% endblock %}
+{% block page_lead %}Full <strong>Update (U)</strong> to formulary line.{% endblock %}
+{% block content %}
+<div class="adm-section" style="max-width:700px;">
+  <form method="post" style="padding:1.15rem 1.25rem 1.5rem;">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+    <div class="form-group">
+      <label for="name">Name</label>
+      <input id="name" name="name" value="{{ medicine.name }}" required/>
+    </div>
+    <div class="form-group">
+      <label for="dosage_info">Dosage</label>
+      <input id="dosage_info" name="dosage_info" value="{{ medicine.dosage_info or '' }}"/>
+    </div>
+    <div class="form-group">
+      <label for="usage_instructions">Usage</label>
+      <textarea id="usage_instructions" name="usage_instructions" rows="5">{{ medicine.usage_instructions or '' }}</textarea>
+    </div>
+    <button class="btn btn-primary" type="submit">Save (U)</button>
+    <a class="btn btn-ghost" href="{{ url_for('admin.medicines') }}">Back</a>
+  </form>
+</div>
+{% endblock %}

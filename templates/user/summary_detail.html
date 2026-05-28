@@ -1,0 +1,57 @@
+{% extends "base_user.html" %}
+{% block title %}Summary #{{ summary.id }}{% endblock %}
+{% block breadcrumb %}
+<a href="{{ url_for('user.dashboard') }}">Workspace</a><span class="sep">/</span><a href="{{ url_for('user.summaries_history') }}">Summaries</a><span class="sep">/</span><span class="here">#{{ summary.id }}</span>
+{% endblock %}
+{% block page_heading %}Clinical summary — {{ patient.name }}{% endblock %}
+{% block page_lead %}Structured 8-section draft from your EHR text. Compare with the source on the left, edit the narrative below, save a final version, and export PDF for your record.{% endblock %}
+{% block content %}
+<div class="user-panel" style="margin-bottom:1.25rem;">
+  <div style="padding:1rem 1.15rem;">
+    <dl class="dl-pro">
+      <dt>Patient</dt><dd>{{ patient.name }} · {{ patient.patient_id }} · {{ patient.age or '—' }} yrs · {{ patient.gender or '—' }}</dd>
+      <dt>Source document</dt><dd>{{ document.original_filename }} ({{ document.file_type|upper }})</dd>
+      <dt>Summary record</dt><dd>ID {{ summary.id }} · Created {{ summary.created_at.strftime('%Y-%m-%d %H:%M UTC') if summary.created_at else '—' }} · Updated {{ summary.updated_at.strftime('%Y-%m-%d %H:%M UTC') if summary.updated_at else '—' }}</dd>
+      <dt>Status</dt><dd>{% if summary.is_saved %}<span class="badge" style="background:rgba(16,185,129,0.2);color:#a7f3d0;">Saved / final</span>{% else %}<span class="badge" style="background:rgba(148,163,184,0.2);color:#e2e8f0;">Draft — not finalized</span>{% endif %}</dd>
+    </dl>
+  </div>
+</div>
+
+<h2 class="section-title" style="font-size:1.1rem;margin:0 0 0.75rem;">Side-by-side review</h2>
+<div class="split-pro" style="margin-bottom:1.75rem;">
+  <div class="card-compare">
+    <div class="card-compare-h">Original extracted EHR</div>
+    <div class="pre-block">{{ raw_ehr }}</div>
+  </div>
+  <div class="card-compare">
+    <div class="card-compare-h">Generated sections (machine)</div>
+    <div class="pre-block" style="font-size:0.82rem;line-height:1.5;">{% if sections %}{% for k in section_keys %}
+<strong style="color:#94a3b8;">{{ labels[k] }}</strong>
+{{ sections[k] or '—' }}
+
+{% endfor %}{% else %}No structured JSON for this record (legacy).{% endif %}</div>
+  </div>
+</div>
+
+<div class="user-panel">
+  <div class="user-panel-header">
+    <div>
+      <h2>Editable summary narrative</h2>
+      <p class="sub">Correct medical terms, add omissions, then save. Download PDF uses this text and structured headers when available.</p>
+    </div>
+    <a class="btn btn-ghost" style="font-size:0.85rem;" href="{{ url_for('user.summary_download', sid=summary.id) }}">Download PDF</a>
+  </div>
+  <div style="padding:1.15rem 1.25rem 1.5rem;">
+    <form method="post">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+      <div class="form-group" style="margin:0;">
+        <label for="edited_content">Final report body</label>
+        <textarea id="edited_content" name="edited_content" rows="20" style="min-height:280px;">{{ summary.edited_content or '' }}</textarea>
+      </div>
+      <p class="muted" style="font-size:0.82rem;margin:0.5rem 0 1rem;"><strong>Update draft</strong> stores text without marking final. <strong>Save summary</strong> sets status to saved for audit trails.</p>
+      <button class="btn btn-ghost" type="submit" name="draft" value="1">Update draft</button>
+      <button class="btn btn-primary" type="submit" name="save" value="1">Save final summary</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

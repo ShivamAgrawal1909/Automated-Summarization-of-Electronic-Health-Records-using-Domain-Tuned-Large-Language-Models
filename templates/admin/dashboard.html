@@ -1,0 +1,50 @@
+{% extends "base_admin.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block bc_here %}Dashboard{% endblock %}
+{% block page_heading %}Administration dashboard{% endblock %}
+{% block page_lead %}Operate the whole platform: user governance, master patient index across accounts, EHR inventory, summarization review, knowledge-base tuning, and system branding. Counts below are live from the database.{% endblock %}
+{% block content %}
+<div class="adm-kpi">
+  <div class="adm-k"><div class="l">End users</div><div class="v">{{ n_users }}</div><div class="h">Non-admin accounts</div></div>
+  <div class="adm-k"><div class="l">Active (unblocked)</div><div class="v">{{ active_users }}</div><div class="h">Can sign in</div></div>
+  <div class="adm-k"><div class="l">Patients (all)</div><div class="v">{{ n_patients }}</div><div class="h">Master records</div></div>
+  <div class="adm-k"><div class="l">EHR files</div><div class="v">{{ n_ehr }}</div><div class="h">Uploads in storage</div></div>
+  <div class="adm-k"><div class="l">Summaries</div><div class="v">{{ n_sum }}</div><div class="h">Total generated</div></div>
+  <div class="adm-k"><div class="l">Admins</div><div class="v">{{ adm.admins if adm is defined else '—' }}</div><div class="h">Elevated access</div></div>
+</div>
+
+<div class="adm-section">
+  <div class="adm-section-h"><h2>System message</h2>
+    <p>Shown on public landing and footers (editable under Brand &amp; contact).</p>
+  </div>
+  <div style="padding:1rem 1.1rem 1.25rem;">
+    <p class="muted" style="margin:0 0 0.75rem;line-height:1.6;">{{ (brand and brand.system_description) or "Configure the project name, support email, address, and description from System → Brand & contact." }}</p>
+    <a class="btn btn-primary" style="font-size:0.85rem;" href="{{ url_for('admin.brand') }}">Open brand &amp; contact</a>
+    <a class="btn btn-ghost" style="font-size:0.85rem;" href="{{ url_for('admin.reports') }}">View reports</a>
+  </div>
+</div>
+
+<div class="adm-grid2">
+  <div class="adm-section" style="margin:0;">
+    <div class="adm-section-h"><h2>CRUD index</h2><p>Where each object supports Create, Read, Update, Delete in this console.</p></div>
+    <ul class="muted" style="margin:0;padding:1rem 1.1rem 1.25rem 1.4rem;font-size:0.9rem;line-height:1.65;">
+      <li><strong>Users</strong> — Create, View, Edit, Block/Unblock, Delete (end users only for destructive)</li>
+      <li><strong>Patients</strong> — Create (admin), View, Edit, Delete</li>
+      <li><strong>EHR</strong> — Read, Delete (no in-app edit of binary)</li>
+      <li><strong>Summaries</strong> — Read, <strong>Update (admin text)</strong>, Delete</li>
+      <li><strong>Categories / terms / diseases / medicines</strong> — Full CRUD on each table</li>
+      <li><strong>Brand</strong> — Update singleton contact &amp; logo</li>
+    </ul>
+  </div>
+  <div class="adm-section" style="margin:0;">
+    <div class="adm-section-h"><h2>Quick open</h2><p>High-traffic screens</p></div>
+    <div style="padding:1rem 1.1rem 1.25rem;" class="adm-actions">
+      <a class="btn btn-ghost" href="{{ url_for('admin.users_list') }}">Users</a>
+      <a class="btn btn-ghost" href="{{ url_for('admin.patients_list') }}">Patients</a>
+      <a class="btn btn-ghost" href="{{ url_for('admin.ehr_list') }}">EHR</a>
+      <a class="btn btn-ghost" href="{{ url_for('admin.summaries_list') }}">Summaries</a>
+      <a class="btn btn-ghost" href="{{ url_for('admin.terms') }}">Domain terms</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

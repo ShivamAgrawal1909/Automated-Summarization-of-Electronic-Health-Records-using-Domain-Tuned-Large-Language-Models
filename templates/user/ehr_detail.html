@@ -1,0 +1,46 @@
+{% extends "base_user.html" %}
+{% block title %}{{ doc.original_filename }}{% endblock %}
+{% block breadcrumb %}
+<a href="{{ url_for('user.dashboard') }}">Workspace</a><span class="sep">/</span><a href="{{ url_for('user.upload_ehr') }}">Upload</a><span class="sep">/</span><span class="here">Extraction</span>
+{% endblock %}
+{% block page_heading %}Extracted clinical text{% endblock %}
+{% block page_lead %}Verify that the text below matches the source document. If extraction looks incomplete, re-run extraction or replace the file with a text-based export from your EMR.{% endblock %}
+{% block content %}
+<div class="user-panel" style="margin-bottom:1.25rem;">
+  <div style="padding:1rem 1.15rem;">
+    <dl class="dl-pro">
+      <dt>Patient</dt><dd><strong>{{ patient.name }}</strong> ({{ patient.patient_id }}){% if patient.disease_hint %} · {{ patient.disease_hint }}{% endif %}</dd>
+      <dt>Source file</dt><dd>{{ doc.original_filename }} · <span class="badge">{{ doc.file_type|upper }}</span></dd>
+      <dt>Stored path</dt><dd class="muted" style="font-size:0.82rem;word-break:break-all;">{{ doc.stored_path }}</dd>
+      <dt>Uploaded</dt><dd>{{ doc.uploaded_at.strftime('%Y-%m-%d %H:%M UTC') if doc.uploaded_at else '—' }}</dd>
+      <dt>Text stats</dt><dd>{{ n_chars_f }} characters · ~{{ n_words_f }} words</dd>
+      <dt>Summaries from this file</dt><dd>{{ n_summaries_for_doc }} generated report(s)</dd>
+    </dl>
+  </div>
+</div>
+
+<div class="user-panel">
+  <div class="user-panel-header">
+    <div>
+      <h2>Full extracted text</h2>
+      <p class="sub">Scroll to review; this is the input to domain summarization</p>
+    </div>
+    <div style="display:flex;flex-wrap:wrap;gap:0.5rem;">
+      <form method="post" action="{{ url_for('user.ehr_reextract', eid=doc.id) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+        <button class="btn btn-ghost" type="submit" style="font-size:0.85rem;">Re-extract</button>
+      </form>
+      {% if doc.extracted_text %}
+      <form method="post" action="{{ url_for('user.ehr_summarize', eid=doc.id) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+        <button class="btn btn-primary" type="submit" style="font-size:0.85rem;">Generate structured summary</button>
+      </form>
+      {% endif %}
+      <a class="btn btn-ghost" href="{{ url_for('user.upload_ehr') }}" style="font-size:0.85rem;">Another upload</a>
+    </div>
+  </div>
+  <div class="user-panel-body">
+    <div class="pre-block" style="max-height:520px;border:0;border-radius:0;">{{ doc.extracted_text or '— No text extracted. Try a different file or Re-extract after ensuring the PDF contains selectable text.' }}</div>
+  </div>
+</div>
+{% endblock %}

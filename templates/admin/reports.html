@@ -1,0 +1,28 @@
+{% extends "base_admin.html" %}
+{% block title %}Reports{% endblock %}
+{% block bc_here %}Reports{% endblock %}
+{% block page_heading %}Operational report{% endblock %}
+{% block page_lead %}Read-only rollups (no edit). For exports, use your database or BI connector on the SQLite/Postgres file. Figures refresh on load.{% endblock %}
+{% block content %}
+<div class="adm-kpi">
+  <div class="adm-k"><div class="l">End-user accounts</div><div class="v">{{ n_users }}</div><div class="h">Non-admin</div></div>
+  <div class="adm-k"><div class="l">Active users</div><div class="v">{{ active_users }}</div><div class="h">Not blocked</div></div>
+  <div class="adm-k"><div class="l">Blocked (any role)</div><div class="v">{{ blocked_users }}</div><div class="h">Login disabled</div></div>
+  <div class="adm-k"><div class="l">Patients</div><div class="v">{{ n_patients }}</div><div class="h">All owners</div></div>
+  <div class="adm-k"><div class="l">EHR documents</div><div class="v">{{ n_ehr }}</div><div class="h">Total files</div></div>
+  <div class="adm-k"><div class="l">Summaries</div><div class="v">{{ n_sum }}</div><div class="h">All reports</div></div>
+  {% if adm is defined %}
+  <div class="adm-k"><div class="l">Admin accounts</div><div class="v">{{ adm.admins }}</div><div class="h">Elevated</div></div>
+  <div class="adm-k"><div class="l">Taxonomy</div><div class="v">{{ adm.categories }} / {{ adm.terms }}</div><div class="h">Categories / terms</div></div>
+  {% endif %}
+</div>
+<div class="adm-section">
+  <div class="adm-section-h"><h2>Audit guidance</h2>
+    <p>Use patient detail, user view, and summary editor screens for per-record audit. This page is aggregate only.</p>
+  </div>
+  <ul class="muted" style="margin:0;padding:1.1rem 1.2rem 1.25rem 1.4rem;font-size:0.9rem;line-height:1.6;">
+    <li>All destructive actions in this console are logged only through your application and database; add external logging for HIPAA-style audit if required.</li>
+    <li>“Blocked” in this report includes blocked admins if you ever set the flag (normally unused).</li>
+  </ul>
+</div>
+{% endblock %}

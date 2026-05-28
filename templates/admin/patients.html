@@ -1,0 +1,61 @@
+{% extends "base_admin.html" %}
+{% block title %}All patients{% endblock %}
+{% block bc_here %}Patients{% endblock %}
+{% block page_heading %}Global patient registry{% endblock %}
+{% block page_lead %}Every patient in the system, regardless of which user account owns the record. <strong>Create (C)</strong> ties a new patient to an end user; <strong>Read (R)</strong> opens a detail with documents &amp; summaries; <strong>Update/Delete (U/D)</strong> on detail or in-line edit.{% endblock %}
+{% block content %}
+<div class="adm-section">
+  <div class="adm-section-h">
+    <h2>Records ({{ patients|length }})</h2>
+    <p>File and summary counts are scoped to this patient row.</p>
+    <div class="actions">
+      <a class="btn btn-primary" style="font-size:0.85rem;" href="{{ url_for('admin.patients_new') }}">Create patient (C)</a>
+    </div>
+  </div>
+  <div class="adm-tablewrap">
+    <table class="adm-t">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>External ID</th>
+          <th>Name</th>
+          <th>Owner (user)</th>
+          <th>Hint</th>
+          <th>EHR</th>
+          <th>Sum</th>
+          <th>Created</th>
+          <th>CRUD</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in patients %}
+        <tr>
+          <td>{{ p.id }}</td>
+          <td><code style="font-size:0.8rem;">{{ p.patient_id }}</code></td>
+          <td><strong>{{ p.name }}</strong></td>
+          <td>
+            <a href="{{ url_for('admin.users_view', uid=p.owner.id) }}">{{ p.owner.name }}</a><br/>
+            <span class="muted" style="font-size:0.75rem;">{{ p.owner.email }}</span>
+          </td>
+          <td class="muted" style="font-size:0.85rem;max-width:200px;">{{ p.disease_hint or '—' }}</td>
+          <td>{{ doc_counts.get(p.id, 0) }}</td>
+          <td>{{ sum_counts.get(p.id, 0) }}</td>
+          <td class="muted" style="white-space:nowrap;">{{ p.created_at.strftime('%Y-%m-%d') if p.created_at else '—' }}</td>
+          <td class="adm-actions">
+            <a class="btn btn-ghost" style="padding:0.3rem 0.45rem;font-size:0.75rem;" href="{{ url_for('admin.patients_detail', pid=p.id) }}">View (R)</a>
+            <a class="btn btn-ghost" style="padding:0.3rem 0.45rem;font-size:0.75rem;" href="{{ url_for('admin.patients_edit', pid=p.id) }}">Edit (U)</a>
+            <form class="inline-form" method="post" action="{{ url_for('admin.patients_delete', pid=p.id) }}" onsubmit="return confirm('Delete patient #{{ p.id }}?');">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+              <button class="btn btn-danger" type="submit" style="padding:0.3rem 0.45rem;font-size:0.75rem;">Delete (D)</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% if not patients %}
+  <p class="muted" style="padding:1.5rem 1.1rem;">No patient rows yet. Create from user uploads (app) or use Create patient (admin) above.</p>
+  {% endif %}
+</div>
+{% endblock %}

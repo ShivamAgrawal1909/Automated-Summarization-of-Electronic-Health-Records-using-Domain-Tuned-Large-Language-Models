@@ -1,0 +1,62 @@
+{% extends "base_admin.html" %}
+{% block title %}Medical terms{% endblock %}
+{% block bc_here %}Terms{% endblock %}
+{% block page_heading %}Domain medical terms{% endblock %}
+{% block page_lead %}Vocabulary rows used to bias summarization. <strong>CRUD</strong>: create below; read in table; edit and delete on each row. Max 500 rows shown (oldest if over limit) — contact dev to paginate.{% endblock %}
+{% block content %}
+<div class="adm-section" style="margin-bottom:1.25rem;">
+  <div class="adm-section-h"><h2>Create term (C)</h2><p>Optional category link and curator notes.</p></div>
+  <form method="post" style="padding:1.1rem 1.25rem 1.5rem;">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;max-width:800px;">
+      <div class="form-group" style="margin:0;">
+        <label for="term">Term</label>
+        <input id="term" name="term" required placeholder="e.g. troponin"/>
+      </div>
+      <div class="form-group" style="margin:0;">
+        <label for="category_id">Category</label>
+        <select id="category_id" name="category_id">
+          <option value="">— None —</option>
+          {% for c in categories %}
+          <option value="{{ c.id }}">{{ c.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+    <div class="form-group" style="max-width:800px;">
+      <label for="notes">Curator notes</label>
+      <input id="notes" name="notes" placeholder="Synonyms, usage…"/>
+    </div>
+    <button class="btn btn-primary" type="submit">Create</button>
+  </form>
+</div>
+<div class="adm-section">
+  <div class="adm-section-h"><h2>Directory (up to 500)</h2>
+    <p>Total in knowledge base: {{ terms|length }} on this page.</p>
+  </div>
+  <div class="adm-tablewrap">
+    <table class="adm-t">
+      <thead><tr><th>ID</th><th>Term</th><th>Category</th><th>Notes</th><th>U / D</th></tr></thead>
+      <tbody>
+        {% for t in terms %}
+        <tr>
+          <td>{{ t.id }}</td>
+          <td><strong>{{ t.term }}</strong></td>
+          <td>{{ t.category.name if t.category else '—' }}</td>
+          <td class="muted" style="font-size:0.85rem;max-width:360px;">{{ t.notes or '—' }}</td>
+          <td class="adm-actions">
+            <a class="btn btn-ghost" style="padding:0.3rem 0.45rem;font-size:0.75rem;" href="{{ url_for('admin.terms_edit', tid=t.id) }}">Edit (U)</a>
+            <form class="inline-form" method="post" action="{{ url_for('admin.terms_delete', tid=t.id) }}" onsubmit="return confirm('Delete term?');">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+              <button class="btn btn-danger" type="submit" style="padding:0.3rem 0.45rem;font-size:0.75rem;">Delete (D)</button>
+            </form>
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="5" class="muted" style="padding:1.25rem;">No terms yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

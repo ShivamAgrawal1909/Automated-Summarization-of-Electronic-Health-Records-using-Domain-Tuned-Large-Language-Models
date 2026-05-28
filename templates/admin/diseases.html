@@ -1,0 +1,48 @@
+{% extends "base_admin.html" %}
+{% block title %}Diseases{% endblock %}
+{% block bc_here %}Diseases{% endblock %}
+{% block page_heading %}Disease catalog{% endblock %}
+{% block page_lead %}Reference list for UI hints and search. <strong>CRUD</strong> on <code>diseases</code> table: add, list, edit, delete. Names must be unique.{% endblock %}
+{% block content %}
+<div class="adm-section" style="max-width:600px;margin-bottom:1.25rem;">
+  <div class="adm-section-h"><h2>Create (C)</h2></div>
+  <form method="post" style="padding:1.1rem 1.25rem 1.5rem;">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+    <div class="form-group">
+      <label for="name">Canonical name</label>
+      <input id="name" name="name" required/>
+    </div>
+    <div class="form-group">
+      <label for="description">Description</label>
+      <textarea id="description" name="description" rows="3"></textarea>
+    </div>
+    <button class="btn btn-primary" type="submit">Create</button>
+  </form>
+</div>
+<div class="adm-section">
+  <div class="adm-section-h"><h2>All rows ({{ diseases|length }})</h2></div>
+  <div class="adm-tablewrap">
+    <table class="adm-t">
+      <thead><tr><th>ID</th><th>Name</th><th>Description</th><th>U / D</th></tr></thead>
+      <tbody>
+        {% for d in diseases %}
+        <tr>
+          <td>{{ d.id }}</td>
+          <td><strong>{{ d.name }}</strong></td>
+          <td class="muted" style="font-size:0.86rem;max-width:400px;">{{ (d.description or '—')[:200] }}{% if d.description and d.description|length > 200 %}…{% endif %}</td>
+          <td class="adm-actions">
+            <a class="btn btn-ghost" style="padding:0.3rem 0.45rem;font-size:0.75rem;" href="{{ url_for('admin.diseases_edit', did=d.id) }}">Edit (U)</a>
+            <form class="inline-form" method="post" action="{{ url_for('admin.diseases_delete', did=d.id) }}" onsubmit="return confirm('Delete?');">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+              <button class="btn btn-danger" type="submit" style="padding:0.3rem 0.45rem;font-size:0.75rem;">Delete (D)</button>
+            </form>
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="4" class="muted" style="padding:1.25rem;">No diseases.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

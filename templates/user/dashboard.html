@@ -1,0 +1,140 @@
+{% extends "base_user.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block bc_here %}Dashboard{% endblock %}
+{% block page_heading %}Operations dashboard{% endblock %}
+{% block page_lead %}Track uploads, generated summaries, and your patient registry. Use the recommended workflow to move from chart ingestion to a finalized PDF summary.{% endblock %}
+{% block content %}
+<dl class="dl-pro" style="margin:0 0 1.5rem;padding:0.85rem 1rem;background:rgba(20,184,166,0.06);border:1px solid rgba(20,184,166,0.2);border-radius:12px;max-width:100%;">
+  <dt>Account</dt><dd><strong>{{ account.email }}</strong> · Member since {{ account.created_at.strftime('%b %Y') if account.created_at else '—' }}{% if account.phone %} · {{ account.phone }}{% endif %}</dd>
+  <dt>Role</dt><dd>{{ (account.designation or 'clinician')|replace('_',' ')|title }} · end-user access</dd>
+  <dt>Environment</dt><dd>{{ (brand and brand.project_name) or "MedSynapse" }} — structured 8-section clinical summaries (PDF export supported)</dd>
+</dl>
+
+<div class="kpi-row">
+  <div class="kpi-card">
+    <div class="kpi-label">Patient registry</div>
+    <div class="kpi-value">{{ total_patients }}</div>
+    <div class="kpi-hint">Demographics &amp; identifiers you manage</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">EHR documents</div>
+    <div class="kpi-value">{{ total_ehr }}</div>
+    <div class="kpi-hint">Text or PDF uploads with extracted text</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">Summaries</div>
+    <div class="kpi-value">{{ total_summaries }}</div>
+    <div class="kpi-hint">{{ saved_summaries }} marked as saved / final</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">Quick actions</div>
+    <div class="kpi-hint" style="margin-top:0.5rem;">
+      <a class="btn btn-primary" style="font-size:0.8rem;padding:0.45rem 0.85rem;" href="{{ url_for('user.upload_ehr') }}">Upload EHR</a>
+      <a class="btn btn-ghost" style="font-size:0.8rem;padding:0.45rem 0.85rem;" href="{{ url_for('user.patients_new') }}">Add patient</a>
+    </div>
+  </div>
+</div>
+
+<div class="user-panel">
+  <div class="flow-steps">
+    <div class="flow-step">
+      <span class="num">1</span>
+      <strong>Register patient</strong>
+      <p>Capture legal name, age, gender, contact, and your internal patient ID.</p>
+    </div>
+    <div class="flow-step">
+      <span class="num">2</span>
+      <strong>Upload chart</strong>
+      <p>PDF or plain text. We extract text for verification before summarization.</p>
+    </div>
+    <div class="flow-step">
+      <span class="num">3</span>
+      <strong>Generate summary</strong>
+      <p>Domain-weighted sections: symptoms, diagnosis, meds, labs, plan, follow-up.</p>
+    </div>
+    <div class="flow-step">
+      <span class="num">4</span>
+      <strong>Review &amp; export</strong>
+      <p>Edit narrative, save final version, download a signed-style PDF report.</p>
+    </div>
+  </div>
+</div>
+
+<div class="dashboard-grid">
+  <div class="user-panel" style="margin:0;">
+    <div class="user-panel-header">
+      <div>
+        <h2>Recent summaries</h2>
+        <p class="sub">Newest generated reports across your patients (max 8)</p>
+      </div>
+      <a class="btn btn-ghost" style="font-size:0.85rem;padding:0.4rem 0.75rem;" href="{{ url_for('user.summaries_history') }}">View all</a>
+    </div>
+    <div class="user-panel-body">
+      {% if recent_summaries %}
+      <div class="table-wrap" style="border:0;border-radius:0;">
+        <table class="data-pro">
+          <thead>
+            <tr>
+              <th>Patient</th>
+              <th>Document</th>
+              <th>Status</th>
+              <th>Created (UTC)</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for s in recent_summaries %}
+            <tr>
+              <td><strong>{{ s.patient.name }}</strong><br/><span class="muted" style="font-size:0.8rem;">{{ s.patient.patient_id }}</span></td>
+              <td>{{ s.document.original_filename }}<br/><span class="muted" style="font-size:0.75rem;">{{ s.document.file_type|upper }}</span></td>
+              <td>{% if s.is_saved %}<span class="badge" style="background:rgba(16,185,129,0.2);color:#a7f3d0;">Saved</span>{% else %}<span class="badge" style="background:rgba(148,163,184,0.15);color:#cbd5e1;">Draft</span>{% endif %}</td>
+              <td class="muted" style="white-space:nowrap;">{{ s.created_at.strftime('%Y-%m-%d %H:%M') if s.created_at else '—' }}</td>
+              <td><a class="btn btn-ghost" style="padding:0.35rem 0.65rem;font-size:0.8rem;" href="{{ url_for('user.summary_detail', sid=s.id) }}">Open</a></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="empty-state">No summaries yet. Upload a document and generate your first structured summary.</div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="user-panel" style="margin:0;">
+    <div class="user-panel-header">
+      <div>
+        <h2>Recent uploads</h2>
+        <p class="sub">Latest files with extraction (max 6)</p>
+      </div>
+      <a class="btn btn-ghost" style="font-size:0.85rem;padding:0.4rem 0.75rem;" href="{{ url_for('user.upload_ehr') }}">New upload</a>
+    </div>
+    <div class="user-panel-body">
+      {% if recent_docs %}
+      <div class="table-wrap" style="border:0;border-radius:0;">
+        <table class="data-pro">
+          <thead>
+            <tr>
+              <th>File</th>
+              <th>Patient</th>
+              <th>Uploaded</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for d in recent_docs %}
+            <tr>
+              <td><a href="{{ url_for('user.ehr_detail', eid=d.id) }}">{{ d.original_filename }}</a></td>
+              <td>{{ d.patient.name }}</td>
+              <td class="muted" style="white-space:nowrap;">{{ d.uploaded_at.strftime('%Y-%m-%d %H:%M') if d.uploaded_at else '—' }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="empty-state"><p>No uploads yet.</p><a class="btn btn-primary" href="{{ url_for('user.upload_ehr') }}">Upload EHR</a></div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

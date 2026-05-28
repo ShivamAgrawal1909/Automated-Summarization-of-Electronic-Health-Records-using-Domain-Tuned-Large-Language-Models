@@ -1,0 +1,34 @@
+{% extends "base_admin.html" %}
+{% block title %}EHR #{{ doc.id }}{% endblock %}
+{% block breadcrumb %}
+<a href="{{ url_for('admin.dashboard') }}">Admin</a><span class="sep">/</span><a href="{{ url_for('admin.ehr_list') }}">EHR</a><span class="sep">/</span><span class="here">#{{ doc.id }}</span>
+{% endblock %}
+{% block page_heading %}EHR document #{{ doc.id }}{% endblock %}
+{% block page_lead %}Read-only inspection of stored file metadata and extracted narrative. Use patient and user links for ownership context. Delete from the list view or patient detail if the file is invalid.{% endblock %}
+{% block content %}
+<div class="adm-kpi">
+  <div class="adm-k"><div class="l">Characters</div><div class="v" style="font-size:1.2rem;">{{ n_chars_f }}</div><div class="h">Extracted text</div></div>
+  <div class="adm-k"><div class="l">Words (approx)</div><div class="v" style="font-size:1.2rem;">{{ n_words_f }}</div><div class="h">Whitespace split</div></div>
+  <div class="adm-k"><div class="l">Summaries</div><div class="v">{{ n_summaries_for_doc }}</div><div class="h">Linked reports</div></div>
+</div>
+<dl class="adm-dl" style="padding:0 0 1rem;max-width:900px;">
+  <dt>Patient</dt><dd><a href="{{ url_for('admin.patients_detail', pid=doc.patient_id) }}">{{ doc.patient.name if doc.patient else '—' }}</a> ({{ doc.patient.patient_id if doc.patient else '—' }})</dd>
+  <dt>Uploader</dt><dd>{% if doc.uploader %}<a href="{{ url_for('admin.users_view', uid=doc.uploader.id) }}">{{ doc.uploader.email }}</a>{% else %}—{% endif %}</dd>
+  <dt>Original name</dt><dd>{{ doc.original_filename }}</dd>
+  <dt>Stored path</dt><dd style="word-break:break-all;font-size:0.82rem;">{{ doc.stored_path }}</dd>
+  <dt>Uploaded</dt><dd>{{ doc.uploaded_at.strftime('%Y-%m-%d %H:%M UTC') if doc.uploaded_at else '—' }}</dd>
+</dl>
+<div class="adm-section">
+  <div class="adm-section-h">
+    <h2>Extracted text (read)</h2>
+    <div class="actions adm-actions">
+      <form method="post" action="{{ url_for('admin.ehr_delete', eid=doc.id) }}" class="inline-form" onsubmit="return confirm('Delete this document permanently?');">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+        <button class="btn btn-danger" type="submit" style="font-size:0.85rem;">Delete (D)</button>
+      </form>
+      <a class="btn btn-ghost" href="{{ url_for('admin.ehr_list') }}">Back to list</a>
+    </div>
+  </div>
+  <div class="adm-pre-wrap"><pre class="adm-pre">{{ doc.extracted_text or '— No text.' }}</pre></div>
+</div>
+{% endblock %}

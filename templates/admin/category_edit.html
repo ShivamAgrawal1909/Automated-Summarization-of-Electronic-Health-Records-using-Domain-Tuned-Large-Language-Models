@@ -1,0 +1,24 @@
+{% extends "base_admin.html" %}
+{% block title %}Edit category{% endblock %}
+{% block breadcrumb %}
+<a href="{{ url_for('admin.dashboard') }}">Admin</a><span class="sep">/</span><a href="{{ url_for('admin.categories') }}">Categories</a><span class="sep">/</span><span class="here">Edit #{{ category.id }}</span>
+{% endblock %}
+{% block page_heading %}Update category #{{ category.id }}{% endblock %}
+{% block page_lead %}Applies to grouping of medical terms. <strong>Update (U)</strong> and return to the directory.{% endblock %}
+{% block content %}
+<div class="adm-section" style="max-width:560px;">
+  <form method="post" style="padding:1.15rem 1.25rem 1.5rem;">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+    <div class="form-group">
+      <label for="name">Name</label>
+      <input id="name" name="name" value="{{ category.name }}" required/>
+    </div>
+    <div class="form-group">
+      <label for="description">Description</label>
+      <textarea id="description" name="description" rows="3">{{ category.description or '' }}</textarea>
+    </div>
+    <button class="btn btn-primary" type="submit">Save (U)</button>
+    <a class="btn btn-ghost" href="{{ url_for('admin.categories') }}">Back</a>
+  </form>
+</div>
+{% endblock %}

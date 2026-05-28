@@ -1,0 +1,71 @@
+{% extends "base_public.html" %}
+{% block title %}{{ (brand and brand.project_name) or "MedSynapse" }} — EHR Summarization{% endblock %}
+{% block content %}
+<section class="hero container">
+  <div class="hero-grid">
+    <div>
+      <span class="pill">Domain-tuned clinical NLP</span>
+      <h1>Automated summarization of electronic health records you can trust in the workflow</h1>
+      <p class="lead">Upload PDF or text charts, verify extraction, and generate structured summaries aligned with patient information, symptoms, diagnoses, medications, labs, treatment plans, and follow-up — all in one secure workspace.</p>
+      <div style="display:flex;flex-wrap:wrap;gap:0.75rem;margin-top:1.5rem;">
+        <a class="btn btn-primary" href="{{ url_for('auth.register') }}">Start free</a>
+        <a class="btn btn-ghost" href="{{ url_for('auth.login') }}">Sign in to workspace</a>
+      </div>
+    </div>
+    <div class="hero-card">
+      <p style="margin:0 0 0.5rem;font-size:0.85rem;color:#94a3b8;">Snapshot</p>
+      <div class="stats" style="margin:0;">
+        <div class="stat-card">
+          <div class="muted">Structured sections</div>
+          <div class="n">8</div>
+          <div class="muted" style="font-size:0.8rem;">Patient info through follow-up</div>
+        </div>
+        <div class="stat-card">
+          <div class="muted">Formats</div>
+          <div class="n">PDF</div>
+          <div class="muted" style="font-size:0.8rem;">+ plain text exports</div>
+        </div>
+      </div>
+      <p class="muted" style="margin-top:1rem;font-size:0.9rem;">Built for clinicians, researchers, and operations teams who need audit-friendly documentation and editable outputs.</p>
+    </div>
+  </div>
+</section>
+
+<section class="container" style="margin-bottom:3rem;">
+  <h2 class="section-title">Why teams choose this platform</h2>
+  <div class="feature-grid">
+    <div class="feature">
+      <h3>Secure by design</h3>
+      <p>Password hashing, role-based access, and separated admin controls for sensitive health data.</p>
+    </div>
+    <div class="feature">
+      <h3>Verify before you summarize</h3>
+      <p>Review extracted text from PDFs or notes so nothing important is missed before generation.</p>
+    </div>
+    <div class="feature">
+      <h3>Domain vocabulary</h3>
+      <p>Administrators can maintain categories, terms, diseases, and medicines to steer summarization.</p>
+    </div>
+    <div class="feature">
+      <h3>Edit &amp; export</h3>
+      <p>Compare original and summary side by side, refine wording, save versions, and download PDFs.</p>
+    </div>
+    <div class="feature">
+      <h3>Patient-centric records</h3>
+      <p>Link multiple uploads to each patient and search across names, IDs, dates, and conditions.</p>
+    </div>
+    <div class="feature">
+      <h3>Executive-ready admin</h3>
+      <p>One dashboard for users, EHRs, summaries, and system-wide reporting and brand settings.</p>
+    </div>
+  </div>
+</section>
+
+<section class="container" style="margin-bottom:4rem;">
+  <div class="panel panel-wide" style="margin:0 auto;text-align:center;">
+    <h2 class="section-title" style="text-align:center;">Ready to modernize your chart review?</h2>
+    <p class="lead" style="margin:0 auto 1.5rem;">Create an account, register patients, and generate your first structured summary in minutes.</p>
+    <a class="btn btn-primary" href="{{ url_for('auth.register') }}">Get started</a>
+  </div>
+</section>
+{% endblock %}

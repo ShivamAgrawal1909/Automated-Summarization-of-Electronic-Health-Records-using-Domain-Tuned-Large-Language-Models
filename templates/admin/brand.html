@@ -1,0 +1,36 @@
+{% extends "base_admin.html" %}
+{% block title %}Brand &amp; contact{% endblock %}
+{% block bc_here %}Brand{% endblock %}
+{% block page_heading %}System identity &amp; contact{% endblock %}
+{% block page_lead %}Singleton configuration row: public name, support email, address, and marketing copy. <strong>Update (U)</strong> the record; replace logo by uploading a new image. No separate “create” (single brand row).{% endblock %}
+{% block content %}
+<div class="adm-section" style="max-width:720px;">
+  <form method="post" enctype="multipart/form-data" style="padding:1.15rem 1.25rem 1.5rem;">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+    <div class="form-group">
+      <label for="project_name">Project / product name</label>
+      <input id="project_name" name="project_name" value="{{ brand.project_name }}" required/>
+    </div>
+    <div class="form-group">
+      <label for="contact_email">Support email</label>
+      <input id="contact_email" name="contact_email" type="email" value="{{ brand.contact_email or '' }}"/>
+    </div>
+    <div class="form-group">
+      <label for="address">Mailing or HQ address (plain text)</label>
+      <textarea id="address" name="address" rows="2">{{ brand.address or '' }}</textarea>
+    </div>
+    <div class="form-group">
+      <label for="system_description">Public description (landing, footers)</label>
+      <textarea id="system_description" name="system_description" rows="4">{{ brand.system_description or '' }}</textarea>
+    </div>
+    <div class="form-group">
+      <label for="logo">Logo (PNG, JPG, SVG…)</label>
+      <input id="logo" name="logo" type="file" accept="image/*"/>
+      {% if brand.logo_path %}
+      <p class="muted" style="font-size:0.82rem;margin:0.4rem 0 0;">Current: <a href="{{ url_for('main.brand_logo') }}" target="_blank" rel="noopener">view current file</a></p>
+      {% endif %}
+    </div>
+    <button class="btn btn-primary" type="submit">Save brand (U)</button>
+  </form>
+</div>
+{% endblock %}

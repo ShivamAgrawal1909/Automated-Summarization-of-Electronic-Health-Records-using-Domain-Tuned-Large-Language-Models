@@ -1,0 +1,61 @@
+{% extends "base_admin.html" %}
+{% block title %}Users{% endblock %}
+{% block bc_here %}Users{% endblock %}
+{% block page_heading %}End user &amp; admin accounts{% endblock %}
+{% block page_lead %}Full <strong>CRUD</strong> on standard users: create, view profile with activity, edit fields and roles, block/unblock, and delete. You cannot block or delete yourself from the destructive actions. Admin accounts are protected from non-edit deletion paths.{% endblock %}
+{% block content %}
+<div class="adm-section">
+  <div class="adm-section-h">
+    <h2>Directory ({{ users|length }})</h2>
+    <p>Columns: role, block state, and quick links. Use View for a full profile before making destructive changes.</p>
+    <div class="actions">
+      <a class="btn btn-primary" style="font-size:0.85rem;" href="{{ url_for('admin.users_new') }}">Create user (C)</a>
+    </div>
+  </div>
+  <div class="adm-tablewrap">
+    <table class="adm-t">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Role</th>
+          <th>Status</th>
+          <th>Created (UTC)</th>
+          <th>Actions (R/U/D + block)</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for u in users %}
+        <tr>
+          <td>{{ u.id }}</td>
+          <td><strong>{{ u.name }}</strong><br/>{% if u.designation %}<span class="muted" style="font-size:0.8rem;">{{ u.designation|replace('_',' ') }}</span>{% endif %}</td>
+          <td class="muted" style="font-size:0.86rem;">{{ u.email }}</td>
+          <td><span class="badge" style="background:rgba(59,130,246,0.15);">{{ u.role }}</span></td>
+          <td>{% if u.role == 'user' and u.is_blocked %}<span class="badge" style="background:rgba(239,68,68,0.2);">Blocked</span>{% elif u.role == 'user' %}Active{% else %}Admin{% endif %}</td>
+          <td class="muted" style="white-space:nowrap;font-size:0.82rem;">{{ u.created_at.strftime('%Y-%m-%d') if u.created_at else '—' }}</td>
+          <td class="adm-actions" style="white-space:normal;max-width:360px;">
+            <a class="btn btn-ghost" style="padding:0.3rem 0.45rem;font-size:0.75rem;" href="{{ url_for('admin.users_view', uid=u.id) }}">View (R)</a>
+            <a class="btn btn-ghost" style="padding:0.3rem 0.45rem;font-size:0.75rem;" href="{{ url_for('admin.users_edit', uid=u.id) }}">Edit (U)</a>
+            {% if u.id != current_user.id and u.role == 'user' %}
+            <form class="inline-form" method="post" action="{{ url_for('admin.users_block', uid=u.id) }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+              <button class="btn btn-ghost" type="submit" style="padding:0.3rem 0.45rem;font-size:0.75rem;">Block</button>
+            </form>
+            <form class="inline-form" method="post" action="{{ url_for('admin.users_unblock', uid=u.id) }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+              <button class="btn btn-ghost" type="submit" style="padding:0.3rem 0.45rem;font-size:0.75rem;">Unblock</button>
+            </form>
+            <form class="inline-form" method="post" action="{{ url_for('admin.users_delete', uid=u.id) }}" onsubmit="return confirm('Delete this user?');">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+              <button class="btn btn-danger" type="submit" style="padding:0.3rem 0.45rem;font-size:0.75rem;">Delete (D)</button>
+            </form>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

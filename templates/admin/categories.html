@@ -1,0 +1,56 @@
+{% extends "base_admin.html" %}
+{% block title %}Categories{% endblock %}
+{% block bc_here %}Categories{% endblock %}
+{% block page_heading %}Medical categories{% endblock %}
+{% block page_lead %}Taxonomy used to group domain terms. Full <strong>CRUD</strong>: add on this page, edit or delete per row. Linked terms may have <code>NULL</code> category if uncategorized.{% endblock %}
+{% block content %}
+<div class="adm-section" style="max-width:560px;margin-bottom:1.25rem;">
+  <div class="adm-section-h"><h2>Create category (C)</h2><p>Name must be unique.</p></div>
+  <form method="post" style="padding:1.1rem 1.25rem 1.5rem;">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+    <div class="form-group">
+      <label for="name">Name</label>
+      <input id="name" name="name" required placeholder="e.g. Cardiology"/>
+    </div>
+    <div class="form-group">
+      <label for="description">Description</label>
+      <textarea id="description" name="description" rows="2"></textarea>
+    </div>
+    <button class="btn btn-primary" type="submit">Create</button>
+  </form>
+</div>
+<div class="adm-section">
+  <div class="adm-section-h"><h2>All categories ({{ categories|length }})</h2>
+    <p>Term count = medical terms referencing this category ID (excludes null category bucket).</p>
+  </div>
+  <div class="adm-tablewrap">
+    {% if categories %}
+    <table class="adm-t">
+      <thead><tr><th>ID</th><th>Name</th><th>Terms</th><th>Description</th><th>R / U / D</th></tr></thead>
+      <tbody>
+        {% for c in categories %}
+        <tr>
+          <td>{{ c.id }}</td>
+          <td><strong>{{ c.name }}</strong></td>
+          <td>{{ term_by_cat.get(c.id, 0) if term_by_cat is defined else '—' }}</td>
+          <td class="muted" style="font-size:0.86rem;max-width:280px;">{{ c.description or '—' }}</td>
+          <td class="adm-actions">
+            <a class="btn btn-ghost" style="padding:0.3rem 0.45rem;font-size:0.75rem;" href="{{ url_for('admin.categories_edit', cid=c.id) }}">Edit (U)</a>
+            <form class="inline-form" method="post" action="{{ url_for('admin.categories_delete', cid=c.id) }}" onsubmit="return confirm('Delete category {{ c.name }}?');">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+              <button class="btn btn-danger" type="submit" style="padding:0.3rem 0.45rem;font-size:0.75rem;">Delete (D)</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p class="muted" style="padding:1.25rem;">No categories. Create one above.</p>
+    {% endif %}
+  </div>
+</div>
+{% if term_by_cat is defined and term_by_cat.get(None) %}
+<p class="muted" style="font-size:0.88rem;">Uncategorized terms: <strong>{{ term_by_cat[None] }}</strong> (not shown per row above).</p>
+{% endif %}
+{% endblock %}

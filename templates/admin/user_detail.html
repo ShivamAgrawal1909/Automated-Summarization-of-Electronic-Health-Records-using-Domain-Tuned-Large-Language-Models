@@ -1,0 +1,106 @@
+{% extends "base_admin.html" %}
+{% block title %}User {{ u.name }}{% endblock %}
+{% block breadcrumb %}
+<a href="{{ url_for('admin.dashboard') }}">Admin</a><span class="sep">/</span><a href="{{ url_for('admin.users_list') }}">Users</a><span class="sep">/</span><span class="here">#{{ u.id }}</span>
+{% endblock %}
+{% block page_heading %}{{ u.name }}{% endblock %}
+{% block page_lead %}Full account profile, access flags, and activity footprint (patients, documents, summaries). Use Edit to change fields; block/unblock only applies to end-user accounts.{% endblock %}
+{% block content %}
+<div class="adm-kpi">
+  <div class="adm-k"><div class="l">System role</div><div class="v" style="font-size:1.1rem;">{{ u.role|upper }}</div><div class="h">{% if u.is_blocked %}<span class="badge" style="background:rgba(239,68,68,0.25);">Blocked</span>{% else %}Active{% endif %}</div></div>
+  <div class="adm-k"><div class="l">Patients</div><div class="v">{{ n_patients }}</div><div class="h">In registry</div></div>
+  <div class="adm-k"><div class="l">EHR files</div><div class="v">{{ n_ehr }}</div><div class="h">Uploaded by this user</div></div>
+  <div class="adm-k"><div class="l">Summaries</div><div class="v">{{ n_sum }}</div><div class="h">Generated in workspace</div></div>
+</div>
+
+<div class="adm-section">
+  <div class="adm-section-h"><h2>Account details</h2><p>Read — use Edit to update</p>
+    <div class="actions adm-actions">
+      <a class="btn btn-primary" style="font-size:0.85rem;padding:0.45rem 0.85rem;" href="{{ url_for('admin.users_edit', uid=u.id) }}">Edit (CRUD)</a>
+      <a class="btn btn-ghost" style="font-size:0.85rem;" href="{{ url_for('admin.users_list') }}">Back to list</a>
+    </div>
+  </div>
+  <div style="padding:1rem 1.1rem 1.25rem;">
+    <dl class="adm-dl">
+      <dt>User ID</dt><dd>{{ u.id }}</dd>
+      <dt>Email</dt><dd>{{ u.email }}</dd>
+      <dt>Phone</dt><dd>{{ u.phone or '—' }}</dd>
+      <dt>Designation</dt><dd>{{ (u.designation or '—')|replace('_',' ')|title }}</dd>
+      <dt>Created</dt><dd>{{ u.created_at.strftime('%Y-%m-%d %H:%M UTC') if u.created_at else '—' }}</dd>
+    </dl>
+  </div>
+</div>
+
+<div class="adm-section" style="margin-top:1rem;">
+  <div class="adm-section-h"><h2>Patients ({{ patients|length }} shown, max 50)</h2><p>Read</p>
+    <div class="actions"><a class="btn btn-ghost" style="font-size:0.8rem;" href="{{ url_for('admin.patients_list') }}">All patients</a></div>
+  </div>
+  <div class="adm-tablewrap">
+    {% if patients %}
+    <table class="adm-t">
+      <thead><tr><th>ID</th><th>Name</th><th>External ref</th><th></th></tr></thead>
+      <tbody>
+        {% for p in patients %}
+        <tr>
+          <td>{{ p.id }}</td>
+          <td>{{ p.name }}</td>
+          <td><code style="font-size:0.8rem;">{{ p.patient_id }}</code></td>
+          <td><a class="btn btn-ghost" style="padding:0.3rem 0.5rem;font-size:0.75rem;" href="{{ url_for('admin.patients_detail', pid=p.id) }}">View</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}<p class="muted" style="padding:1rem 1.1rem;">No patients for this user.</p>{% endif %}
+  </div>
+</div>
+
+<div class="adm-section">
+  <div class="adm-section-h"><h2>Recent summaries (15)</h2><p>Read</p>
+    <div class="actions"><a class="btn btn-ghost" style="font-size:0.8rem;" href="{{ url_for('admin.summaries_list') }}">All summaries</a></div>
+  </div>
+  <div class="adm-tablewrap">
+    {% if recent_sums %}
+    <table class="adm-t">
+      <thead><tr><th>ID</th><th>Patient</th><th>File</th><th>Status</th><th>Time</th><th></th></tr></thead>
+      <tbody>
+        {% for s in recent_sums %}
+        <tr>
+          <td>{{ s.id }}</td>
+          <td>{{ s.patient.name if s.patient else '—' }}</td>
+          <td>{{ s.document.original_filename if s.document else '—' }}</td>
+          <td>{% if s.is_saved %}Saved{% else %}Draft{% endif %}</td>
+          <td class="muted" style="white-space:nowrap;">{{ s.created_at.strftime('%Y-%m-%d %H:%M') if s.created_at else '—' }}</td>
+          <td>
+            <a class="btn btn-ghost" style="padding:0.3rem 0.5rem;font-size:0.75rem;" href="{{ url_for('admin.summary_view', sid=s.id) }}">View</a>
+            <a class="btn btn-ghost" style="padding:0.3rem 0.5rem;font-size:0.75rem;" href="{{ url_for('admin.summary_edit', sid=s.id) }}">Edit</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}<p class="muted" style="padding:1rem 1.1rem;">No summaries yet.</p>{% endif %}
+  </div>
+</div>
+{% if u.id != current_user.id and u.role == 'user' %}
+<div class="adm-section" style="border-color:rgba(239,68,68,0.35);">
+  <div class="adm-section-h"><h2>Moderation (delete / block)</h2>
+    <p>Destructive operations — only for end-user accounts. You cannot block or delete your own session or other admins here.</p>
+  </div>
+  <div style="padding:1rem 1.1rem 1.25rem;" class="adm-actions">
+    <form method="post" action="{{ url_for('admin.users_block', uid=u.id) }}" class="inline-form" onsubmit="return confirm('Block this user?');">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+      <button class="btn btn-ghost" type="submit">Block user</button>
+    </form>
+    <form method="post" action="{{ url_for('admin.users_unblock', uid=u.id) }}" class="inline-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+      <button class="btn btn-ghost" type="submit">Unblock</button>
+    </form>
+    <form method="post" action="{{ url_for('admin.users_delete', uid=u.id) }}" class="inline-form" onsubmit="return confirm('Permanently delete this user?');">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+      <button class="btn btn-danger" type="submit">Delete user</button>
+    </form>
+  </div>
+  <p class="adm-tx-danger" style="padding:0 1.1rem 1rem;">Delete removes the user and dependent records per database rules.</p>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,52 @@
+{% extends "base_admin.html" %}
+{% block title %}Summaries{% endblock %}
+{% block bc_here %}Summaries{% endblock %}
+{% block page_heading %}All generated summaries{% endblock %}
+{% block page_lead %}Every summary across users. <strong>Read (R)</strong> opens original EHR vs edited body. <strong>Update (U)</strong> lets an administrator correct the narrative and saved flag. <strong>Delete (D)</strong> removes the report record only (not the EHR file).{% endblock %}
+{% block content %}
+<div class="adm-section">
+  <div class="adm-section-h"><h2>Reports ({{ summaries|length }})</h2><p>Newest first.</p></div>
+  <div class="adm-tablewrap">
+    {% if summaries %}
+    <table class="adm-t">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Patient</th>
+          <th>Author</th>
+          <th>Source file</th>
+          <th>Status</th>
+          <th>Updated (UTC)</th>
+          <th>CRUD</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for s in summaries %}
+        <tr>
+          <td>{{ s.id }}</td>
+          <td>
+            <a href="{{ url_for('admin.patients_detail', pid=s.patient_id) }}">{{ s.patient.name if s.patient else '—' }}</a><br/>
+            <span class="muted" style="font-size:0.78rem;">{{ s.patient.patient_id if s.patient else '' }}</span>
+          </td>
+          <td class="muted" style="font-size:0.84rem;">{% if s.user %}<a href="{{ url_for('admin.users_view', uid=s.user_id) }}">{{ s.user.email }}</a>{% else %}—{% endif %}</td>
+          <td class="muted" style="font-size:0.82rem;">{{ s.document.original_filename if s.document else '—' }}</td>
+          <td>{% if s.is_saved %}<span class="badge" style="background:rgba(16,185,129,0.2);">Saved</span>{% else %}Draft{% endif %}</td>
+          <td class="muted" style="white-space:nowrap;">{{ s.updated_at.strftime('%Y-%m-%d %H:%M') if s.updated_at else '—' }}</td>
+          <td class="adm-actions">
+            <a class="btn btn-ghost" style="padding:0.3rem 0.45rem;font-size:0.75rem;" href="{{ url_for('admin.summary_view', sid=s.id) }}">View (R)</a>
+            <a class="btn btn-ghost" style="padding:0.3rem 0.45rem;font-size:0.75rem;" href="{{ url_for('admin.summary_edit', sid=s.id) }}">Edit (U)</a>
+            <form class="inline-form" method="post" action="{{ url_for('admin.summary_delete', sid=s.id) }}" onsubmit="return confirm('Delete summary #{{ s.id }}?');">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+              <button class="btn btn-danger" type="submit" style="padding:0.3rem 0.45rem;font-size:0.75rem;">Delete (D)</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p class="muted" style="padding:1.25rem;">No summaries in the system.</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

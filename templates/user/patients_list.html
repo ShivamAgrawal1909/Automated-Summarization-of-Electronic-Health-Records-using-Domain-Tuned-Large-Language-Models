@@ -1,0 +1,63 @@
+{% extends "base_user.html" %}
+{% block title %}Patient registry{% endblock %}
+{% block breadcrumb %}
+<a href="{{ url_for('user.dashboard') }}">Workspace</a><span class="sep">/</span><span class="here">Patients</span>
+{% endblock %}
+{% block page_heading %}Patient registry{% endblock %}
+{% block page_lead %}Central list of patients you track in this workspace. Each patient can have multiple uploaded EHR files and multiple generated summaries. IDs must be unique within your account.{% endblock %}
+{% block content %}
+<div class="user-panel" style="margin-bottom:1rem;">
+  <div class="user-panel-header">
+    <div>
+      <h2>All patients ({{ patients|length }})</h2>
+      <p class="sub">Columns show linked chart uploads and summary count</p>
+    </div>
+    <a class="btn btn-primary" href="{{ url_for('user.patients_new') }}">Register patient</a>
+  </div>
+  <div class="user-panel-body">
+    {% if patients %}
+    <div class="table-wrap" style="border:0;border-radius:0;">
+      <table class="data-pro">
+        <thead>
+          <tr>
+            <th>Patient ID</th>
+            <th>Legal name</th>
+            <th>Demographics</th>
+            <th>Focus / hint</th>
+            <th>EHR files</th>
+            <th>Summaries</th>
+            <th>Created</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in patients %}
+          <tr>
+            <td><code style="font-size:0.85rem;">{{ p.patient_id }}</code></td>
+            <td><strong>{{ p.name }}</strong></td>
+            <td class="muted">{{ p.age or '—' }} yrs · {{ p.gender or '—' }}{% if p.contact %}<br/>{{ p.contact }}{% endif %}</td>
+            <td>{{ p.disease_hint or '—' }}</td>
+            <td>{{ doc_count_by_patient.get(p.id, 0) }}</td>
+            <td>{{ summary_count_by_patient.get(p.id, 0) }}</td>
+            <td class="muted" style="white-space:nowrap;font-size:0.82rem;">{{ p.created_at.strftime('%Y-%m-%d') if p.created_at else '—' }}</td>
+            <td style="white-space:nowrap;">
+              <a class="btn btn-ghost" style="padding:0.35rem 0.55rem;font-size:0.78rem;" href="{{ url_for('user.patients_edit', pid=p.id) }}">Edit</a>
+              <form class="inline-form" method="post" action="{{ url_for('user.patients_delete', pid=p.id) }}" onsubmit="return confirm('Delete this patient and all linked uploads &amp; summaries?');">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                <button class="btn btn-danger" type="submit" style="padding:0.35rem 0.55rem;font-size:0.78rem;">Delete</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <p>No patients registered. Add a patient before uploading EHR files.</p>
+      <a class="btn btn-primary" href="{{ url_for('user.patients_new') }}">Register first patient</a>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

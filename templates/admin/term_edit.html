@@ -1,0 +1,33 @@
+{% extends "base_admin.html" %}
+{% block title %}Edit term{% endblock %}
+{% block breadcrumb %}
+<a href="{{ url_for('admin.dashboard') }}">Admin</a><span class="sep">/</span><a href="{{ url_for('admin.terms') }}">Terms</a><span class="sep">/</span><span class="here">#{{ term.id }}</span>
+{% endblock %}
+{% block page_heading %}Update term #{{ term.id }}{% endblock %}
+{% block page_lead %}Re-link category or change curator notes. <strong>Update (U)</strong>.{% endblock %}
+{% block content %}
+<div class="adm-section" style="max-width:640px;">
+  <form method="post" style="padding:1.15rem 1.25rem 1.5rem;">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+    <div class="form-group">
+      <label for="term">Term</label>
+      <input id="term" name="term" value="{{ term.term }}" required/>
+    </div>
+    <div class="form-group">
+      <label for="category_id">Category</label>
+      <select id="category_id" name="category_id">
+        <option value="">— None —</option>
+        {% for c in categories %}
+        <option value="{{ c.id }}" {{ 'selected' if term.category_id == c.id else '' }}>{{ c.name }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="notes">Notes</label>
+      <input id="notes" name="notes" value="{{ term.notes or '' }}"/>
+    </div>
+    <button class="btn btn-primary" type="submit">Save (U)</button>
+    <a class="btn btn-ghost" href="{{ url_for('admin.terms') }}">Back</a>
+  </form>
+</div>
+{% endblock %}

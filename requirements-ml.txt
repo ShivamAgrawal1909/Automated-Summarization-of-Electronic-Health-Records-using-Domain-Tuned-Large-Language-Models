@@ -1,0 +1,10 @@
+# Optional: EHR model fine-tuning and HF inference
+# Install: pip install -r requirements-ml.txt
+# PyTorch: pick a wheel matching your OS/CUDA from https://pytorch.org/ if needed
+torch>=2.1.0
+transformers>=4.38.0
+datasets>=2.16.0
+accelerate>=0.27.0
+sentencepiece>=0.1.99
+protobuf>=3.20.0
+safetensors>=0.4.0

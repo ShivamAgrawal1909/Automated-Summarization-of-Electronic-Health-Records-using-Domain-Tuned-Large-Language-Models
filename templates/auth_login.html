@@ -1,0 +1,22 @@
+{% extends "base_public.html" %}
+{% block title %}Sign in — MedSynapse{% endblock %}
+{% block content %}
+<div class="panel">
+  <h1 class="page-title" style="margin-bottom:0.5rem;">Sign in</h1>
+  <p class="muted" style="margin-top:0;">Use your work email and password.</p>
+  <form method="post" action="{{ url_for('auth.login') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+    <div class="form-group">
+      <label for="email">Email</label>
+      <input id="email" name="email" type="email" required autocomplete="username"/>
+    </div>
+    <div class="form-group">
+      <label for="password">Password</label>
+      <input id="password" name="password" type="password" required autocomplete="current-password"/>
+    </div>
+    <button class="btn btn-primary" type="submit" style="width:100%;">Sign in</button>
+  </form>
+  <p class="muted" style="margin-top:1rem;">No account? <a href="{{ url_for('auth.register') }}">Register</a></p>
+  <p class="muted" style="font-size:0.8rem;">Admins with elevated access are redirected to the admin console after login.</p>
+</div>
+{% endblock %}

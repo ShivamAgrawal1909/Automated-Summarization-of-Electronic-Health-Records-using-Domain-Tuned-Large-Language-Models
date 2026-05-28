@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>{% block title %}{{ (brand and brand.project_name) or "MedSynapse EHR" }}{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}"/>
+</head>
+<body>
+<header class="container topbar">
+  <a class="logo" href="{{ url_for('main.index') }}">
+    <span class="logo-mark" aria-hidden="true"></span>
+    <span>{{ (brand and brand.project_name) or "MedSynapse" }}</span>
+  </a>
+  <nav class="nav-actions">
+    {% if current_user.is_authenticated %}
+    {% if current_user.role == 'admin' %}
+    <a class="btn btn-ghost" href="{{ url_for('admin.dashboard') }}">Admin</a>
+    {% else %}
+    <a class="btn btn-ghost" href="{{ url_for('user.dashboard') }}">Workspace</a>
+    {% endif %}
+    <a class="btn btn-primary" href="{{ url_for('auth.logout') }}">Logout</a>
+    {% else %}
+    <a class="btn btn-ghost" href="{{ url_for('auth.login') }}">Sign in</a>
+    <a class="btn btn-primary" href="{{ url_for('auth.register') }}">Create account</a>
+    {% endif %}
+  </nav>
+</header>
+<main>
+  {% with messages = get_flashed_messages(with_categories=true) %}
+  <div class="container">
+    {% for category, message in messages %}
+    <div class="flash flash-{{ category }}">{{ message }}</div>
+    {% endfor %}
+  </div>
+  {% endwith %}
+  {% block content %}{% endblock %}
+</main>
+<footer class="site">
+  <div class="container">
+    <p>&copy; 2026 {{ (brand and brand.project_name) or "MedSynapse" }}. Clinical intelligence platform.</p>
+    {% if brand and brand.contact_email %}<p>Contact: {{ brand.contact_email }}{% if brand.address %} · {{ brand.address }}{% endif %}</p>{% endif %}
+  </div>
+</footer>
+</body>
+</html>

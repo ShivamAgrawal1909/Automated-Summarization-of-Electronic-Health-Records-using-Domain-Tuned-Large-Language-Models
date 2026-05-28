@@ -1,0 +1,32 @@
+{% extends "base_admin.html" %}
+{% block title %}Edit summary #{{ summary.id }}{% endblock %}
+{% block breadcrumb %}
+<a href="{{ url_for('admin.dashboard') }}">Admin</a><span class="sep">/</span><a href="{{ url_for('admin.summaries_list') }}">Summaries</a><span class="sep">/</span><span class="here">#{{ summary.id }} / Edit</span>
+{% endblock %}
+{% block page_heading %}Update summary #{{ summary.id }}{% endblock %}
+{% block page_lead %}<strong>Update (U)</strong> — Adjust the final narrative and mark whether this version is a saved, audit-ready report. This does not alter the source EHR file.{% endblock %}
+{% block content %}
+<dl class="adm-dl" style="padding:0 0 1rem;max-width:800px;">
+  <dt>Patient</dt><dd>{{ patient.name }} ({{ patient.patient_id }})</dd>
+  <dt>Source EHR</dt><dd>{{ document.original_filename }} · <a class="btn btn-ghost" style="font-size:0.75rem;padding:0.2rem 0.5rem;" href="{{ url_for('admin.ehr_view', eid=document.id) }}">View document</a></dd>
+  <dt>Author (user ID)</dt><dd>{{ summary.user_id }} · <a href="{{ url_for('admin.users_view', uid=summary.user_id) }}">Open user</a></dd>
+</dl>
+<div class="adm-section" style="max-width:900px;">
+  <div class="adm-section-h"><h2>Edited body</h2><p>Replaces the text shown to the clinician for export (PDF) where applicable.</p></div>
+  <form method="post" style="padding:1.1rem 1.25rem 1.5rem;">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+    <div class="form-group" style="margin:0 0 1rem;">
+      <label for="edited_content">Narrative</label>
+      <textarea id="edited_content" name="edited_content" rows="18" style="min-height:300px;">{{ summary.edited_content or '' }}</textarea>
+    </div>
+    <div class="form-group" style="margin:0 0 1rem;">
+      <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;">
+        <input type="checkbox" name="is_saved" value="1" {{ 'checked' if summary.is_saved else '' }}/>
+        <span>Mark as <strong>saved / final</strong> (compliance &amp; reporting)</span>
+      </label>
+    </div>
+    <button class="btn btn-primary" type="submit">Save changes</button>
+    <a class="btn btn-ghost" href="{{ url_for('admin.summary_view', sid=summary.id) }}">View read-only</a>
+  </form>
+</div>
+{% endblock %}

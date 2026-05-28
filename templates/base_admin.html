@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en" class="admin-workspace">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="robots" content="noindex,nofollow"/>
+  <title>{% block title %}Admin{% endblock %} — {{ (brand and brand.project_name) or "MedSynapse" }}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}"/>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/admin-panel.css') }}"/>
+  {% block extra_head %}{% endblock %}
+</head>
+<body class="admin-ws-body">
+{% set ep = request.endpoint %}
+<div class="adm-backdrop" id="admBackdrop"></div>
+<div class="adm-grid">
+  <aside class="adm-sidebar" id="admSidebar">
+    <div class="adm-brand-block">
+      <div class="t">{{ (brand and brand.project_name) or "MedSynapse" }}</div>
+      <div class="s">Administration</div>
+    </div>
+
+    <div class="adm-side-group">Platform</div>
+    <a class="adm-side-link {{ 'is-here' if ep == 'admin.dashboard' else '' }}" href="{{ url_for('admin.dashboard') }}">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
+      Dashboard
+    </a>
+
+    <div class="adm-side-group">Clinical data (CRUD)</div>
+    <a class="adm-side-link {{ 'is-here' if ep in ['admin.users_list','admin.users_new','admin.users_edit','admin.users_view'] else '' }}" href="{{ url_for('admin.users_list') }}">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      End users
+    </a>
+    <a class="adm-side-link {{ 'is-here' if ep in ['admin.patients_list','admin.patients_new','admin.patients_detail','admin.patients_edit'] else '' }}" href="{{ url_for('admin.patients_list') }}">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+      All patients
+    </a>
+    <a class="adm-side-link {{ 'is-here' if ep in ['admin.ehr_list','admin.ehr_view'] else '' }}" href="{{ url_for('admin.ehr_list') }}">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      EHR documents
+    </a>
+    <a class="adm-side-link {{ 'is-here' if ep in ['admin.summaries_list','admin.summary_view','admin.summary_edit'] else '' }}" href="{{ url_for('admin.summaries_list') }}">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      Summaries
+    </a>
+
+    <div class="adm-side-group">Knowledge base</div>
+    <a class="adm-side-link {{ 'is-here' if ep in ['admin.categories','admin.categories_edit'] else '' }}" href="{{ url_for('admin.categories') }}">Categories</a>
+    <a class="adm-side-link {{ 'is-here' if ep in ['admin.terms','admin.terms_edit'] else '' }}" href="{{ url_for('admin.terms') }}">Medical terms</a>
+    <a class="adm-side-link {{ 'is-here' if ep in ['admin.diseases','admin.diseases_edit'] else '' }}" href="{{ url_for('admin.diseases') }}">Diseases</a>
+    <a class="adm-side-link {{ 'is-here' if ep in ['admin.medicines','admin.medicines_edit'] else '' }}" href="{{ url_for('admin.medicines') }}">Medicines</a>
+
+    <div class="adm-side-group">System</div>
+    <a class="adm-side-link {{ 'is-here' if ep == 'admin.brand' else '' }}" href="{{ url_for('admin.brand') }}">Brand &amp; contact</a>
+    <a class="adm-side-link {{ 'is-here' if ep == 'admin.reports' else '' }}" href="{{ url_for('admin.reports') }}">Reports</a>
+    <a class="adm-side-link {{ 'is-here' if ep == 'admin.change_password' else '' }}" href="{{ url_for('admin.change_password') }}">Change password</a>
+
+    <div class="adm-side-spacer"></div>
+    <a class="adm-side-link" href="{{ url_for('main.index') }}">View public site</a>
+    <a class="adm-side-link adm-side-link--danger" href="{{ url_for('auth.logout') }}">Log out</a>
+  </aside>
+
+  <div class="adm-wrap">
+    <header class="adm-mast">
+      <div class="adm-crumbs-row">
+        <button type="button" class="adm-burger" id="admBurger" aria-label="Menu" aria-expanded="false">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <nav class="adm-bc" aria-label="Breadcrumb">{% block breadcrumb %}<a href="{{ url_for('admin.dashboard') }}">Admin</a><span class="sep">/</span><span class="here">{% block bc_here %}Home{% endblock %}</span>{% endblock %}</nav>
+      </div>
+      {% if adm is defined %}
+      <div class="adm-kpi-belt" title="System-wide statistics">
+        <span class="adm-pill">{{ adm.users }} users</span>
+        <span class="adm-pill">{{ adm.patients }} patients</span>
+        <span class="adm-pill">{{ adm.ehr }} EHR</span>
+        <span class="adm-pill">{{ adm.summaries }} summaries</span>
+      </div>
+      {% endif %}
+    </header>
+
+    <div class="adm-inner">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+        <div class="flash flash-{{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endwith %}
+
+      <div class="adm-hero">
+        <h1>{% block page_heading %}Page{% endblock %}</h1>
+        <p class="lead">{% block page_lead %}{% endblock %}</p>
+      </div>
+
+      {% block content %}{% endblock %}
+
+      <p class="adm-foot">Administrator session · Full CRUD and governance tools above · Unauthorized access to this area is prohibited. {% if brand and brand.contact_email %}Support: {{ brand.contact_email }}{% endif %}</p>
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+  var b=document.getElementById('admBackdrop');
+  var s=document.getElementById('admSidebar');
+  var g=document.getElementById('admBurger');
+  function close(){ s.classList.remove('is-open'); b.classList.remove('is-on'); g.setAttribute('aria-expanded','false'); }
+  function openM(){ s.classList.add('is-open'); b.classList.add('is-on'); g.setAttribute('aria-expanded','true'); }
+  if(g&&s&&b){
+    g.addEventListener('click', function(){ s.classList.contains('is-open')?close():openM(); });
+    b.addEventListener('click', close);
+    s.querySelectorAll('a').forEach(function(a){ a.addEventListener('click', function(){ if(window.matchMedia('(max-width:1100px)').matches) close(); }); });
+  }
+})();
+</script>
+{% block page_scripts %}{% endblock %}
+</body>
+</html>

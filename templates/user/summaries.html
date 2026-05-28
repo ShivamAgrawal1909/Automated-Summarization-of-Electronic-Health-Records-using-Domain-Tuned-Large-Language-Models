@@ -1,0 +1,74 @@
+{% extends "base_user.html" %}
+{% block title %}Summary history{% endblock %}
+{% block breadcrumb %}
+<a href="{{ url_for('user.dashboard') }}">Workspace</a><span class="sep">/</span><span class="here">Summaries</span>
+{% endblock %}
+{% block page_heading %}Summary history{% endblock %}
+{% block page_lead %}Chronological list of every report generated in your account. Open to compare with the EHR, update the clinical text, export a PDF, or remove incorrect runs.{% endblock %}
+{% block content %}
+<div class="kpi-row" style="margin-bottom:1.25rem;">
+  <div class="kpi-card">
+    <div class="kpi-label">Total in workspace</div>
+    <div class="kpi-value">{{ summaries|length }}</div>
+    <div class="kpi-hint">This page shows all; use search for keyword lookup</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">Saved (final)</div>
+    <div class="kpi-value">{{ ws_counts.saved if ws_counts is defined else '—' }}</div>
+    <div class="kpi-hint">From global stats — reflects locked narratives</div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-label">Next step</div>
+    <div class="kpi-hint" style="padding-top:0.35rem;">
+      <a class="btn btn-primary" style="font-size:0.8rem;" href="{{ url_for('user.upload_ehr') }}">New upload</a>
+    </div>
+  </div>
+</div>
+<div class="user-panel">
+  <div class="user-panel-header">
+    <div>
+      <h2>All reports</h2>
+      <p class="sub">Status indicates whether a clinician saved the final narrative</p>
+    </div>
+  </div>
+  <div class="user-panel-body">
+    {% if summaries %}
+    <div class="table-wrap" style="border:0;border-radius:0;">
+      <table class="data-pro">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Patient</th>
+            <th>Source file</th>
+            <th>Status</th>
+            <th>Last update (UTC)</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for s in summaries %}
+          <tr>
+            <td><code style="font-size:0.8rem;">#{{ s.id }}</code></td>
+            <td><strong>{{ s.patient.name }}</strong><br/><span class="muted" style="font-size:0.8rem;">{{ s.patient.patient_id }}</span></td>
+            <td>{{ s.document.original_filename }}<br/><span class="muted" style="font-size:0.75rem;">{{ s.document.file_type|upper }}</span></td>
+            <td>{% if s.is_saved %}<span class="badge" style="background:rgba(16,185,129,0.2);color:#a7f3d0;">Saved</span>{% else %}<span class="badge" style="background:rgba(148,163,184,0.15);">Draft</span>{% endif %}</td>
+            <td class="muted" style="white-space:nowrap;">{{ s.updated_at.strftime('%Y-%m-%d %H:%M') if s.updated_at else '—' }}</td>
+            <td style="white-space:nowrap;">
+              <a class="btn btn-ghost" style="padding:0.32rem 0.5rem;font-size:0.75rem;" href="{{ url_for('user.summary_detail', sid=s.id) }}">Open</a>
+              <a class="btn btn-ghost" style="padding:0.32rem 0.5rem;font-size:0.75rem;" href="{{ url_for('user.summary_download', sid=s.id) }}">PDF</a>
+              <form class="inline-form" method="post" action="{{ url_for('user.summary_delete', sid=s.id) }}" onsubmit="return confirm('Delete this summary?');">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                <button class="btn btn-danger" type="submit" style="padding:0.32rem 0.5rem;font-size:0.75rem;">Delete</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="empty-state">No summaries yet. After upload, use <em>Generate structured summary</em> on the extraction page.</div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

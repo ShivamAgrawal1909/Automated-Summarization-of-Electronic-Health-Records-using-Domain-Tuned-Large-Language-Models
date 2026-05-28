@@ -1,0 +1,55 @@
+{% extends "base_admin.html" %}
+{% block title %}Register patient (admin){% endblock %}
+{% block breadcrumb %}
+<a href="{{ url_for('admin.dashboard') }}">Admin</a><span class="sep">/</span><a href="{{ url_for('admin.patients_list') }}">Patients</a><span class="sep">/</span><span class="here">Create</span>
+{% endblock %}
+{% block page_heading %}Create patient record{% endblock %}
+{% block page_lead %}<strong>Create (C)</strong> — Assigns a new patient to an end-user account. The same external patient ID cannot exist twice for that owner. Use this for data correction onboarding or backfills.{% endblock %}
+{% block content %}
+<div class="adm-section" style="max-width:700px;">
+  <div class="adm-section-h"><h2>Form</h2><p>All required fields must be provided.</p></div>
+  <div style="padding:1.1rem 1.25rem 1.5rem;">
+    <form method="post">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+      <div class="form-group">
+        <label for="user_id">Owning end-user account (required)</label>
+        <select id="user_id" name="user_id" required>
+          <option value="">— Select user —</option>
+          {% for usr in users %}
+          <option value="{{ usr.id }}">{{ usr.name }} — {{ usr.email }}{% if usr.is_blocked %} (blocked){% endif %}</option>
+          {% endfor %}
+        </select>
+        <p class="muted" style="font-size:0.8rem;margin:0.35rem 0 0;">The patient is stored under that user&rsquo;s registry.</p>
+      </div>
+      <div class="form-group">
+        <label for="patient_id">External patient / MRN</label>
+        <input id="patient_id" name="patient_id" required placeholder="Unique per owner"/>
+      </div>
+      <div class="form-group">
+        <label for="name">Full name</label>
+        <input id="name" name="name" required/>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+        <div class="form-group">
+          <label for="age">Age</label>
+          <input id="age" name="age" type="number" min="0"/>
+        </div>
+        <div class="form-group">
+          <label for="gender">Gender</label>
+          <input id="gender" name="gender"/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="contact">Contact</label>
+        <input id="contact" name="contact" type="tel"/>
+      </div>
+      <div class="form-group">
+        <label for="disease_hint">Condition / search hint</label>
+        <input id="disease_hint" name="disease_hint"/>
+      </div>
+      <button class="btn btn-primary" type="submit">Create patient</button>
+      <a class="btn btn-ghost" href="{{ url_for('admin.patients_list') }}">Cancel</a>
+    </form>
+  </div>
+</div>
+{% endblock %}

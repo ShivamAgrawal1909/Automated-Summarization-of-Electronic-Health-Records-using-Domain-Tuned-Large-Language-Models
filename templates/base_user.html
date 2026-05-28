@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en" class="user-workspace">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="description" content="Secure EHR workspace — upload records, verify extraction, and manage clinical summaries."/>
+  <title>{% block title %}Workspace{% endblock %} — {{ (brand and brand.project_name) or "MedSynapse" }}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}"/>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/user-panel.css') }}"/>
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+{% set ep = request.endpoint %}
+<div class="user-sidebar-backdrop" id="userNavBackdrop" aria-hidden="true"></div>
+<div class="user-shell">
+  <aside class="user-sidebar" id="userSidebar" aria-label="Main navigation">
+    <div class="user-sidebar-brand">
+      <span class="logo-mark" style="width:36px;height:36px;flex-shrink:0;"></span>
+      <div>
+        <div class="name">{{ (brand and brand.project_name) or "MedSynapse" }}</div>
+        <div class="tag">Clinical workspace</div>
+      </div>
+    </div>
+
+    <div class="user-nav-group">Overview</div>
+    <nav class="user-nav" aria-label="Primary">
+      <a href="{{ url_for('user.dashboard') }}" class="{{ 'is-active' if ep == 'user.dashboard' else '' }}">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
+        Dashboard
+      </a>
+    </nav>
+
+    <div class="user-nav-group">Records</div>
+    <nav class="user-nav" aria-label="Records">
+      <a href="{{ url_for('user.patients_list') }}" class="{{ 'is-active' if ep in ['user.patients_list','user.patients_new','user.patients_edit'] else '' }}">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Patient registry
+      </a>
+      <a href="{{ url_for('user.upload_ehr') }}" class="{{ 'is-active' if ep in ['user.upload_ehr','user.ehr_detail'] else '' }}">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        Upload &amp; extract
+      </a>
+      <a href="{{ url_for('user.summaries_history') }}" class="{{ 'is-active' if ep in ['user.summaries_history','user.summary_detail'] else '' }}">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>
+        Summaries
+      </a>
+    </nav>
+
+    <div class="user-nav-group">Tools</div>
+    <nav class="user-nav" aria-label="Tools">
+      <a href="{{ url_for('user.search') }}" class="{{ 'is-active' if ep == 'user.search' else '' }}">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        Global search
+      </a>
+    </nav>
+
+    <div class="user-nav-group">Account</div>
+    <nav class="user-nav" aria-label="Account">
+      <a href="{{ url_for('user.profile') }}" class="{{ 'is-active' if ep == 'user.profile' else '' }}">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Profile &amp; security
+      </a>
+      <a href="{{ url_for('auth.logout') }}">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Log out
+      </a>
+    </nav>
+
+    <div class="user-sidebar-footer">
+      <div class="user-card-mini">
+        <div class="avatar" aria-hidden="true">{{ (current_user.name or current_user.email or "?")[0]|upper }}</div>
+        <div class="who">
+          <strong title="{{ current_user.name }}">{{ current_user.name or 'User' }}</strong>
+          <span title="{{ current_user.email }}">{{ current_user.email }}</span>
+        </div>
+      </div>
+      {% if current_user.designation %}
+      <p style="margin:0.65rem 0.5rem 0;font-size:0.72rem;color:#64748b;">{{ current_user.designation|replace('_',' ')|title }}</p>
+      {% endif %}
+    </div>
+  </aside>
+
+  <div class="user-main">
+    <header class="user-masthead">
+      <div class="user-masthead-left">
+        <button type="button" class="user-burger" id="userNavToggle" aria-label="Open menu" aria-expanded="false">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <nav class="user-breadcrumb" aria-label="Breadcrumb">{% block breadcrumb %}<a href="{{ url_for('user.dashboard') }}">Workspace</a><span class="sep">/</span><span class="here">{% block bc_here %}Home{% endblock %}</span>{% endblock %}</nav>
+      </div>
+      <div class="user-masthead-right">
+        {% if ws_counts is defined %}
+        <div class="user-kpi-inline" title="At-a-glance counts for your account">
+          <span class="user-chip" title="Patients in your registry">{{ ws_counts.patients }} patients</span>
+          <span class="user-chip" title="Uploaded EHR files">{{ ws_counts.ehr }} EHR</span>
+          <span class="user-chip" title="Generated summaries (saved)">{{ ws_counts.saved }}/{{ ws_counts.summaries }} saved</span>
+        </div>
+        {% endif %}
+        <a class="btn btn-ghost" href="{{ url_for('user.profile') }}" style="padding:0.4rem 0.75rem;font-size:0.85rem;">Settings</a>
+      </div>
+    </header>
+
+    <div class="user-body">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+        <div class="flash flash-{{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endwith %}
+
+      <div class="user-page-hero">
+        <h1>{% block page_heading %}Page{% endblock %}</h1>
+        <p class="lead">{% block page_lead %}{% endblock %}</p>
+      </div>
+
+      {% block content %}{% endblock %}
+      <p class="user-footnote">You are working in a secure session. For compliance, do not share credentials. Questions? Contact your administrator{% if brand and brand.contact_email %} ({{ brand.contact_email }}){% endif %}.</p>
+    </div>
+  </div>
+</div>
+<script>
+(function(){
+  var b=document.getElementById('userNavBackdrop');
+  var s=document.getElementById('userSidebar');
+  var t=document.getElementById('userNavToggle');
+  function close(){ s.classList.remove('is-open'); b.classList.remove('is-visible'); t.setAttribute('aria-expanded','false'); }
+  function openMenu(){ s.classList.add('is-open'); b.classList.add('is-visible'); t.setAttribute('aria-expanded','true'); }
+  if(t && s && b){
+    t.addEventListener('click', function(){ if(s.classList.contains('is-open')) close(); else openMenu(); });
+    b.addEventListener('click', close);
+    s.querySelectorAll('a').forEach(function(a){ a.addEventListener('click', function(){ if(window.matchMedia('(max-width:1024px)').matches) close(); }); });
+  }
+})();
+</script>
+{% block page_scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,59 @@
+{% extends "base_user.html" %}
+{% block title %}Profile &amp; security{% endblock %}
+{% block breadcrumb %}
+<a href="{{ url_for('user.dashboard') }}">Workspace</a><span class="sep">/</span><span class="here">Profile</span>
+{% endblock %}
+{% block page_heading %}Profile &amp; security{% endblock %}
+{% block page_lead %}Maintain your identity on file, update contact information, and rotate your password. Changes apply immediately to new sessions.{% endblock %}
+{% block content %}
+<div class="user-panel" style="margin-bottom:1.25rem;">
+  <div class="user-panel-header">
+    <div>
+      <h2>Account summary</h2>
+      <p class="sub">Read-only reference for your workspace entitlements</p>
+    </div>
+  </div>
+  <div style="padding:1rem 1.15rem 1.25rem;">
+    <dl class="dl-pro">
+      <dt>Full name</dt><dd>{{ user.name }}</dd>
+      <dt>Work email</dt><dd>{{ user.email }}</dd>
+      <dt>Phone</dt><dd>{{ user.phone or '—' }}</dd>
+      <dt>Function / role</dt><dd>{{ (user.designation or '—')|replace('_',' ')|title }}</dd>
+      <dt>Access level</dt><dd>Standard user (EHR upload, summarization, PDF export)</dd>
+      <dt>Registry scope</dt><dd>{{ ws_counts.patients }} patients · {{ ws_counts.ehr }} documents · {{ ws_counts.summaries }} summaries ({{ ws_counts.saved }} saved)</dd>
+      <dt>Member since</dt><dd>{{ user.created_at.strftime('%d %B %Y') if user.created_at else '—' }} (UTC)</dd>
+    </dl>
+  </div>
+</div>
+
+<div class="user-panel">
+  <div class="user-panel-header">
+    <div>
+      <h2>Edit details</h2>
+      <p class="sub">Password is stored using a one-way hash; leave blank to keep your current password.</p>
+    </div>
+  </div>
+  <div style="padding:1.15rem 1.25rem 1.5rem;">
+    <form method="post" style="max-width:520px;">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+      <div class="form-group">
+        <label for="name">Full name</label>
+        <input id="name" name="name" value="{{ user.name }}" autocomplete="name"/>
+      </div>
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input id="email" name="email" type="email" value="{{ user.email }}" autocomplete="email"/>
+      </div>
+      <div class="form-group">
+        <label for="phone">Phone</label>
+        <input id="phone" name="phone" type="tel" value="{{ user.phone or '' }}" autocomplete="tel"/>
+      </div>
+      <div class="form-group">
+        <label for="password">New password</label>
+        <input id="password" name="password" type="password" minlength="6" autocomplete="new-password" placeholder="Leave blank to keep current"/>
+      </div>
+      <button class="btn btn-primary" type="submit">Save changes</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

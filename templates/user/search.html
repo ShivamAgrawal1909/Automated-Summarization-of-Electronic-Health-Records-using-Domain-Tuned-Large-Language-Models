@@ -1,0 +1,109 @@
+{% extends "base_user.html" %}
+{% block title %}Search{% endblock %}
+{% block breadcrumb %}
+<a href="{{ url_for('user.dashboard') }}">Workspace</a><span class="sep">/</span><span class="here">Search</span>
+{% endblock %}
+{% block page_heading %}Global search{% endblock %}
+{% block page_lead %}Search your patient index and generated summary text by name, ID, condition hint, or keywords appearing in saved narratives. This scope is limited to your own account.{% endblock %}
+{% block content %}
+<div class="user-panel" style="margin-bottom:1.25rem;">
+  <div class="user-panel-header">
+    <div>
+      <h2>Query</h2>
+      <p class="sub">Enter at least one term; search is case-insensitive</p>
+    </div>
+  </div>
+  <div style="padding:1.15rem 1.25rem 1.5rem;">
+    <form method="get" action="{{ url_for('user.search') }}" style="display:flex;flex-wrap:wrap;gap:0.75rem;align-items:flex-end;max-width:640px;">
+      <div class="form-group" style="flex:1;min-width:200px;margin:0;">
+        <label for="q">Search terms</label>
+        <input id="q" name="q" value="{{ q }}" placeholder="e.g. diabetes, MRN, patient name…" autocomplete="off"/>
+      </div>
+      <button class="btn btn-primary" type="submit">Run search</button>
+    </form>
+  </div>
+</div>
+
+{% if not q %}
+<div class="hint-block">
+  <strong>Tips.</strong> Try patient last name, full patient ID, disease hint (e.g. <em>atrial</em>), or a medication string from a summary. Date-specific filters can be added in a future release; for now use partial strings from your narrative text.
+</div>
+{% else %}
+
+<div class="user-panel" style="margin-bottom:1.25rem;">
+  <div class="user-panel-header">
+    <div>
+      <h2>Patient matches</h2>
+      <p class="sub">{{ results|length }} result(s) on name, ID, or condition hint</p>
+    </div>
+  </div>
+  <div class="user-panel-body">
+    {% if results %}
+    <div class="table-wrap" style="border:0;border-radius:0;">
+      <table class="data-pro">
+        <thead>
+          <tr>
+            <th>Patient ID</th>
+            <th>Name</th>
+            <th>Hint / focus</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in results %}
+          <tr>
+            <td><code style="font-size:0.85rem;">{{ p.patient_id }}</code></td>
+            <td><strong>{{ p.name }}</strong></td>
+            <td class="muted">{{ p.disease_hint or '—' }}</td>
+            <td>
+              <a class="btn btn-ghost" style="padding:0.35rem 0.6rem;font-size:0.8rem;" href="{{ url_for('user.patients_edit', pid=p.id) }}">View / edit</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="empty-state">No patients matched. Refine your query.</div>
+    {% endif %}
+  </div>
+</div>
+
+<div class="user-panel">
+  <div class="user-panel-header">
+    <div>
+      <h2>Summary content matches</h2>
+      <p class="sub">{{ sum_results|length }} result(s) in generated or edited text (capped at 50)</p>
+    </div>
+  </div>
+  <div class="user-panel-body">
+    {% if sum_results %}
+    <div class="table-wrap" style="border:0;border-radius:0;">
+      <table class="data-pro">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Patient</th>
+            <th>Preview</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for s in sum_results %}
+          <tr>
+            <td><code style="font-size:0.8rem;">#{{ s.id }}</code></td>
+            <td><strong>{{ s.patient.name }}</strong><br/><span class="muted" style="font-size:0.8rem;">{{ s.patient.patient_id }}</span></td>
+            <td class="muted" style="max-width:360px;">{{ (s.edited_content or s.generated_json or '')[:200] }}{% if (s.edited_content or s.generated_json or '')|length > 200 %}…{% endif %}</td>
+            <td><a class="btn btn-ghost" style="padding:0.35rem 0.6rem;font-size:0.8rem;" href="{{ url_for('user.summary_detail', sid=s.id) }}">Open</a></td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="empty-state">No summary text matched. Try a shorter keyword or check spelling.</div>
+    {% endif %}
+  </div>
+</div>
+{% endif %}
+{% endblock %}

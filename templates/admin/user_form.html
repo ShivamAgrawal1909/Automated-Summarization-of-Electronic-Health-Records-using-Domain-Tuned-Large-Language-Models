@@ -1,0 +1,44 @@
+{% extends "base_admin.html" %}
+{% block title %}{{ 'Edit user' if u else 'Create user' }}{% endblock %}
+{% block breadcrumb %}
+<a href="{{ url_for('admin.dashboard') }}">Admin</a><span class="sep">/</span><a href="{{ url_for('admin.users_list') }}">Users</a><span class="sep">/</span><span class="here">{% if u %}Edit #{{ u.id }}{% else %}Create{% endif %}</span>
+{% endblock %}
+{% block page_heading %}{{ 'Update user account' if u else 'Provision new account' }}{% endblock %}
+{% block page_lead %}{% if u %}<strong>Update (U)</strong> — email uniqueness enforced. You cannot demote yourself while editing your own row.{% else %}<strong>Create (C)</strong> — minimum 6 character password. Assign role <code>admin</code> only to trusted operators.{% endif %}{% endblock %}
+{% block content %}
+<div class="adm-section" style="max-width:560px;">
+  <form method="post" style="padding:1.15rem 1.25rem 1.5rem;">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+    <div class="form-group">
+      <label for="name">Full name</label>
+      <input id="name" name="name" value="{{ u.name if u else '' }}" required/>
+    </div>
+    <div class="form-group">
+      <label for="email">Email (login)</label>
+      <input id="email" name="email" type="email" value="{{ u.email if u else '' }}" required/>
+    </div>
+    <div class="form-group">
+      <label for="phone">Phone</label>
+      <input id="phone" name="phone" value="{{ u.phone if u else '' }}"/>
+    </div>
+    <div class="form-group">
+      <label for="designation">Designation / function</label>
+      <input id="designation" name="designation" value="{{ u.designation if u else '' }}" placeholder="Optional label"/>
+    </div>
+    <div class="form-group">
+      <label for="role">System role</label>
+      <select id="role" name="role" {% if u and u.id == current_user.id %}disabled title="You cannot change your own role here"{% endif %}>
+        <option value="user" {{ 'selected' if not u or u.role=='user' else '' }}>User</option>
+        <option value="admin" {{ 'selected' if u and u.role=='admin' else '' }}>Administrator</option>
+      </select>
+      {% if u and u.id == current_user.id %}<input type="hidden" name="role" value="admin"/>{% endif %}
+    </div>
+    <div class="form-group">
+      <label for="password">Password {% if u %}(optional — only if changing){% else %}(min 6 chars){% endif %}</label>
+      <input id="password" name="password" type="password" minlength="6" {{ 'required' if not u else '' }} autocomplete="new-password"/>
+    </div>
+    <button class="btn btn-primary" type="submit">{% if u %}Save (U){% else %}Create (C){% endif %}</button>
+    <a class="btn btn-ghost" href="{% if u %}{{ url_for('admin.users_view', uid=u.id) }}{% else %}{{ url_for('admin.users_list') }}{% endif %}">Cancel</a>
+  </form>
+</div>
+{% endblock %}
