@@ -233,4 +233,5 @@ Training is **optional** and uses **separate** dependencies.
 
 ## License
 
-This project is provided as-is for educational and research use. Add a license file if you redistribute the code.
+This project is intended for educational and research purposes.
+Licensed under the MIT License.
