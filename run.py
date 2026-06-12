@@ -11,8 +11,8 @@ def _shell_ctx():
 def seed_if_needed():
     if os.environ.get("SEED_ON_STARTUP") == "1":
         with app.app_context():
-            from app.seed import seed_data
-            seed_data()
+            import subprocess
+subprocess.run(["python", "seed_data.py"])
 
 seed_if_needed()
 
