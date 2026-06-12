@@ -1,5 +1,6 @@
 from app import create_app, db
 from app.models import User
+import subprocess
 import os
 
 app = create_app()
@@ -11,8 +12,7 @@ def _shell_ctx():
 def seed_if_needed():
     if os.environ.get("SEED_ON_STARTUP") == "1":
         with app.app_context():
-            import subprocess
-subprocess.run(["python", "seed_data.py"])
+            subprocess.run(["python", "seed_data.py"])
 
 seed_if_needed()
 
